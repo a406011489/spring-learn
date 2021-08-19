@@ -24,36 +24,13 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 
 /**
- * Central interface to provide configuration for an application.
- * This is read-only while the application is running, but may be
- * reloaded if the implementation supports this.
+ * 这其实就是Spring 容器，它叫做应用上下文，它继承 BeanFactory ，所以它是 BeanFactory 的扩展升级版，
  *
- * <p>An ApplicationContext provides:
- * <ul>
- * <li>Bean factory methods for accessing application components.
- * Inherited from {@link org.springframework.beans.factory.ListableBeanFactory}.
- * <li>The ability to load file resources in a generic fashion.
- * Inherited from the {@link org.springframework.core.io.ResourceLoader} interface.
- * <li>The ability to publish events to registered listeners.
- * Inherited from the {@link ApplicationEventPublisher} interface.
- * <li>The ability to resolve messages, supporting internationalization.
- * Inherited from the {@link MessageSource} interface.
- * <li>Inheritance from a parent context. Definitions in a descendant context
- * will always take priority. This means, for example, that a single parent
- * context can be used by an entire web application, while each servlet has
- * its own child context that is independent of that of any other servlet.
- * </ul>
- *
- * <p>In addition to standard {@link org.springframework.beans.factory.BeanFactory}
- * lifecycle capabilities, ApplicationContext implementations detect and invoke
- * {@link ApplicationContextAware} beans as well as {@link ResourceLoaderAware},
- * {@link ApplicationEventPublisherAware} and {@link MessageSourceAware} beans.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @see ConfigurableApplicationContext
- * @see org.springframework.beans.factory.BeanFactory
- * @see org.springframework.core.io.ResourceLoader
+ * 它与BeanFactory的区别是：
+ * 1、继承 org.springframework.context.MessageSource 接口，提供国际化的标准访问策略。
+ * 2、继承 org.springframework.context.ApplicationEventPublisher 接口，提供强大的事件机制。
+ * 3、扩展 ResourceLoader ，可以用来加载多种 Resource ，可以灵活访问不同的资源。
+ * 4、对 Web 应用的支持。
  */
 public interface ApplicationContext extends EnvironmentCapable, ListableBeanFactory, HierarchicalBeanFactory,
 		MessageSource, ApplicationEventPublisher, ResourcePatternResolver {

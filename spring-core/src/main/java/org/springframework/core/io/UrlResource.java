@@ -32,13 +32,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link Resource} implementation for {@code java.net.URL} locators.
- * Supports resolution as a {@code URL} and also as a {@code File} in
- * case of the {@code "file:"} protocol.
- *
- * @author Juergen Hoeller
- * @since 28.12.2003
- * @see java.net.URL
+ * 对 java.net.URL类型资源的封装。
  */
 public class UrlResource extends AbstractFileResolvingResource {
 

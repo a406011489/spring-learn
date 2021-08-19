@@ -25,20 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link Resource} implementation for a given byte array.
- * <p>Creates a {@link ByteArrayInputStream} for the given byte array.
- *
- * <p>Useful for loading content from any given byte array,
- * without having to resort to a single-use {@link InputStreamResource}.
- * Particularly useful for creating mail attachments from local content,
- * where JavaMail needs to be able to read the stream multiple times.
- *
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @since 1.2.3
- * @see java.io.ByteArrayInputStream
- * @see InputStreamResource
- * @see org.springframework.mail.javamail.MimeMessageHelper#addAttachment(String, InputStreamSource)
+ * 对字节数组提供的数据的封装。
  */
 public class ByteArrayResource extends AbstractResource {
 

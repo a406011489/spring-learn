@@ -23,24 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link Resource} implementation for a given {@link InputStream}.
- * <p>Should only be used if no other specific {@code Resource} implementation
- * is applicable. In particular, prefer {@link ByteArrayResource} or any of the
- * file-based {@code Resource} implementations where possible.
- *
- * <p>In contrast to other {@code Resource} implementations, this is a descriptor
- * for an <i>already opened</i> resource - therefore returning {@code true} from
- * {@link #isOpen()}. Do not use an {@code InputStreamResource} if you need to
- * keep the resource descriptor somewhere, or if you need to read from a stream
- * multiple times.
- *
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @since 28.12.2003
- * @see ByteArrayResource
- * @see ClassPathResource
- * @see FileSystemResource
- * @see UrlResource
+ * 将给定的 InputStream 作为一种资源的 Resource 的实现类。
  */
 public class InputStreamResource extends AbstractResource {
 
