@@ -29,28 +29,27 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link EntityResolver} implementation for the Spring beans DTD,
- * to load the DTD from the Spring class path (or JAR file).
- *
- * <p>Fetches "spring-beans.dtd" from the class path resource
- * "/org/springframework/beans/factory/xml/spring-beans.dtd",
- * no matter whether specified as some local URL that includes "spring-beans"
- * in the DTD name or as "https://www.springframework.org/dtd/spring-beans-2.0.dtd".
- *
- * @author Juergen Hoeller
- * @author Colin Sampaleanu
- * @since 04.06.2003
- * @see ResourceEntityResolver
+ * Spring Bean dtd 解码器，用来从 classpath 或者 jar 文件中加载 dtd 。
  */
 public class BeansDtdResolver implements EntityResolver {
 
+	/**
+	 * DTD 文件的后缀
+	 */
 	private static final String DTD_EXTENSION = ".dtd";
 
+	/**
+	 * Spring Bean DTD 的文件名
+	 */
 	private static final String DTD_NAME = "spring-beans";
 
 	private static final Log logger = LogFactory.getLog(BeansDtdResolver.class);
 
 
+	/**
+	 * 只是对 systemId 进行了简单的校验（从最后一个 / 开始，内容中是否包含 spring-beans），
+	 * 然后构造一个 InputSource 对象，并设置 publicId、systemId 属性，然后返回。
+	 */
 	@Override
 	@Nullable
 	public InputSource resolveEntity(@Nullable String publicId, @Nullable String systemId) throws IOException {
@@ -59,9 +58,14 @@ public class BeansDtdResolver implements EntityResolver {
 					"] and system ID [" + systemId + "]");
 		}
 
+		// 必须以 .dtd 结尾
 		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
+
+			// 获取最后一个 / 的位置
 			int lastPathSeparator = systemId.lastIndexOf('/');
 			int dtdNameStart = systemId.indexOf(DTD_NAME, lastPathSeparator);
+
+			// 获取 spring-beans 的位置
 			if (dtdNameStart != -1) {
 				String dtdFile = DTD_NAME + DTD_EXTENSION;
 				if (logger.isTraceEnabled()) {
@@ -85,7 +89,7 @@ public class BeansDtdResolver implements EntityResolver {
 			}
 		}
 
-		// Fall back to the parser's default behavior.
+		// 使用默认行为，从网络上下载
 		return null;
 	}
 

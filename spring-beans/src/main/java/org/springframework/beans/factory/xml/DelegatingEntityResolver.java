@@ -26,15 +26,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link EntityResolver} implementation that delegates to a {@link BeansDtdResolver}
- * and a {@link PluggableSchemaResolver} for DTDs and XML schemas, respectively.
+ * 分别代理 dtd 的 BeansDtdResolver 和 xml schemas 的 PluggableSchemaResolver 。
  *
- * @author Rob Harrop
- * @author Juergen Hoeller
- * @author Rick Evans
- * @since 2.0
- * @see BeansDtdResolver
- * @see PluggableSchemaResolver
+ * EntityResolver的作用是，通过实现它，应用可以自定义如何寻找【验证文件】的逻辑。
  */
 public class DelegatingEntityResolver implements EntityResolver {
 
