@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * 用来描述 Spring 中的 Bean 对象。
+ * 该类描述了一个 Bean 实例的定义，包括属性值、构造方法值和继承自它的类的更多信息。
  */
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
