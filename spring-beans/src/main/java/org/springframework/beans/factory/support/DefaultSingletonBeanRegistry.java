@@ -38,7 +38,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * 单例
+ * Spring 的三级缓存
+ * 第一级为 singletonObjects
+ * 第二级为 earlySingletonObjects
+ * 第三级为 singletonFactories
  */
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
@@ -47,17 +50,29 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 
 	/**
-	 * 存放的是单例 bean 的映射。 对应关系为 bean name --> bean instance
+	 * 这里是一级缓存
+	 * 存放的是单例 bean 的映射。
+	 * 对应关系为 bean name --> bean instance
+	 * 注意，这里的 bean 是已经创建完成的。
 	 */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/**
 	 * 存放的是 ObjectFactory，可以理解为创建单例 bean 的 factory 。对应关系是 bean name --> ObjectFactory
+	 *
+	 * 三级缓存，存放的是 ObjectFactory，
+	 *
+	 * 可以理解为创建早期半成品（未初始化完）的 bean 的 factory ，
+	 *
+	 * 最终添加到二级缓存 {@link #earlySingletonObjects} 中
 	 */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
+
 	/**
 	 * 存放的是早期的 bean，对应关系也是 bean name --> bean instance。
+	 *
+	 *  二级缓存，存放的是早期半成品（未初始化完）的 bean
 	 *
 	 * 它与上面的 singletonFactories 区别在于 earlySingletonObjects 中存放的 bean 不一定是完整。
 	 *
@@ -65,7 +80,6 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * 所以当在 bean 的创建过程中，就可以通过 getBean() 方法获取。
 	 */
 	private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
-
 	/** Set of registered singletons, containing the bean names in registration order. */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 

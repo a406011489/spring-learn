@@ -36,31 +36,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Specialization of {@link PlaceholderConfigurerSupport} that resolves ${...} placeholders
- * within bean definition property values and {@code @Value} annotations against the current
- * Spring {@link Environment} and its set of {@link PropertySources}.
+ * PropertyPlaceholderConfigurer 允许我们用 Properties 文件中的属性，来定义应用上下文（配置文件或者注解）。
  *
- * <p>This class is designed as a general replacement for {@code PropertyPlaceholderConfigurer}.
- * It is used by default to support the {@code property-placeholder} element in working against
- * the spring-context-3.1 or higher XSD; whereas, spring-context versions &lt;= 3.0 default to
- * {@code PropertyPlaceholderConfigurer} to ensure backward compatibility. See the spring-context
- * XSD documentation for complete details.
+ * 我们在 XML 配置文件（或者其他方式，如注解方式）中使用占位符的方式来定义一些资源，
+ * 并将这些占位符所代表的资源配置到 Properties 中，
+ * 这样只需要对 Properties 文件进行修改即可，
  *
- * <p>Any local properties (e.g. those added via {@link #setProperties}, {@link #setLocations}
- * et al.) are added as a {@code PropertySource}. Search precedence of local properties is
- * based on the value of the {@link #setLocalOverride localOverride} property, which is by
- * default {@code false} meaning that local properties are to be searched last, after all
- * environment property sources.
- *
- * <p>See {@link org.springframework.core.env.ConfigurableEnvironment} and related javadocs
- * for details on manipulating environment property sources.
- *
- * @author Chris Beams
- * @author Juergen Hoeller
- * @since 3.1
- * @see org.springframework.core.env.ConfigurableEnvironment
- * @see org.springframework.beans.factory.config.PlaceholderConfigurerSupport
- * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
+ * 该类的主要使用场景有：
+ * 1、动态加载配置文件，多环境切换
+ * 2、属性加解密
  */
 public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerSupport implements EnvironmentAware {
 

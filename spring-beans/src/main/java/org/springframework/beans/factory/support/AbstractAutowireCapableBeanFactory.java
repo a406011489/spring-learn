@@ -85,40 +85,7 @@ import org.springframework.util.ReflectionUtils.MethodCallback;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract bean factory superclass that implements default bean creation,
- * with the full capabilities specified by the {@link RootBeanDefinition} class.
- * Implements the {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory}
- * interface in addition to AbstractBeanFactory's {@link #createBean} method.
- *
- * <p>Provides bean creation (with constructor resolution), property population,
- * wiring (including autowiring), and initialization. Handles runtime bean
- * references, resolves managed collections, calls initialization methods, etc.
- * Supports autowiring constructors, properties by name, and properties by type.
- *
- * <p>The main template method to be implemented by subclasses is
- * {@link #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)},
- * used for autowiring by type. In case of a factory which is capable of searching
- * its bean definitions, matching beans will typically be implemented through such
- * a search. For other factory styles, simplified matching algorithms can be implemented.
- *
- * <p>Note that this class does <i>not</i> assume or implement bean definition
- * registry capabilities. See {@link DefaultListableBeanFactory} for an implementation
- * of the {@link org.springframework.beans.factory.ListableBeanFactory} and
- * {@link BeanDefinitionRegistry} interfaces, which represent the API and SPI
- * view of such a factory, respectively.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @author Rob Harrop
- * @author Mark Fisher
- * @author Costin Leau
- * @author Chris Beams
- * @author Sam Brannen
- * @author Phillip Webb
- * @since 13.02.2004
- * @see RootBeanDefinition
- * @see DefaultListableBeanFactory
- * @see BeanDefinitionRegistry
+ * liuyang
  */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory
 		implements AutowireCapableBeanFactory {
@@ -424,7 +391,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
+
+		// 遍历 BeanPostProcessor 数组
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
+
+			// 处理
 			Object current = processor.postProcessBeforeInitialization(result, beanName);
 			if (current == null) {
 				return result;
@@ -439,6 +410,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
+		// 遍历 BeanPostProcessor 数组 一个before，一个after
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
 			Object current = processor.postProcessAfterInitialization(result, beanName);
 			if (current == null) {
@@ -1828,38 +1800,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
-	 * Initialize the given bean instance, applying factory callbacks
-	 * as well as init methods and bean post processors.
-	 * <p>Called from {@link #createBean} for traditionally defined beans,
-	 * and from {@link #initializeBean} for existing bean instances.
-	 * @param beanName the bean name in the factory (for debugging purposes)
-	 * @param bean the new bean instance we may need to initialize
-	 * @param mbd the bean definition that the bean was created with
-	 * (can also be {@code null}, if given an existing bean instance)
-	 * @return the initialized bean instance (potentially wrapped)
-	 * @see BeanNameAware
-	 * @see BeanClassLoaderAware
-	 * @see BeanFactoryAware
-	 * @see #applyBeanPostProcessorsBeforeInitialization
-	 * @see #invokeInitMethods
-	 * @see #applyBeanPostProcessorsAfterInitialization
+	 * 一个 bean 经历了 #createBeanInstance(String beanName, RootBeanDefinition mbd, Object[] args) 方法，
+	 * 被创建出来，然后又经过一番属性注入，依赖处理，历经千辛万苦，千锤百炼，
+	 * 终于有点儿 bean 实例的样子，能堪大任了，只需要经历最后一步就破茧成蝶了。
+	 * 最后一步，其实就是initializeBean
+	 *
+	 * 初始化 bean 的方法其实就是三个步骤的处理，而这三个步骤主要还是根据用户设定的来进行初始化，这三个过程为：
+	 * <1> 激活 Aware 方法。
+	 * <3> 后置处理器的应用。
+	 * <2> 激活自定义的 init 方法。
 	 */
 	protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
+
+		// 安全模式
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+
+				// <1> 激活 Aware 方法，对特殊的 bean 处理：Aware、BeanClassLoaderAware、BeanFactoryAware
 				invokeAwareMethods(beanName, bean);
 				return null;
 			}, getAccessControlContext());
 		}
 		else {
+
+			// <1> 激活 Aware 方法，对特殊的 bean 处理：Aware、BeanClassLoaderAware、BeanFactoryAware
 			invokeAwareMethods(beanName, bean);
 		}
 
+		// <2> 后处理器，before
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
+		// <3> 激活用户自定义的 init 方法
 		try {
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
@@ -1868,6 +1842,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					(mbd != null ? mbd.getResourceDescription() : null),
 					beanName, "Invocation of init method failed", ex);
 		}
+
+		// <2> 后处理器，after
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
@@ -1875,6 +1851,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return wrappedBean;
 	}
 
+	// 在初始化阶段主要是感知 BeanNameAware、BeanClassLoaderAware、BeanFactoryAware 。
 	private void invokeAwareMethods(String beanName, Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof BeanNameAware) {
@@ -1893,20 +1870,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Give a bean a chance to react now all its properties are set,
-	 * and a chance to know about its owning bean factory (this object).
-	 * This means checking whether the bean implements InitializingBean or defines
-	 * a custom init method, and invoking the necessary callback(s) if it does.
-	 * @param beanName the bean name in the factory (for debugging purposes)
-	 * @param bean the new bean instance we may need to initialize
-	 * @param mbd the merged bean definition that the bean was created with
-	 * (can also be {@code null}, if given an existing bean instance)
-	 * @throws Throwable if thrown by init methods or by the invocation process
-	 * @see #invokeCustomInitMethod
+	 * bean标签里的init-method方法，就是在这里设置的
 	 */
 	protected void invokeInitMethods(String beanName, Object bean, @Nullable RootBeanDefinition mbd)
 			throws Throwable {
 
+		// 首先会检查是否是 InitializingBean ，如果是的话需要调用 afterPropertiesSet()
 		boolean isInitializingBean = (bean instanceof InitializingBean);
 		if (isInitializingBean && (mbd == null || !mbd.isExternallyManagedInitMethod("afterPropertiesSet"))) {
 			if (logger.isTraceEnabled()) {
@@ -1928,11 +1897,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 
+		// 判断是否指定了 init-method()，
+		// 如果指定了 init-method()，则再调用制定的init-method
 		if (mbd != null && bean.getClass() != NullBean.class) {
 			String initMethodName = mbd.getInitMethodName();
 			if (StringUtils.hasLength(initMethodName) &&
 					!(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) &&
 					!mbd.isExternallyManagedInitMethod(initMethodName)) {
+
+				// 激活用户自定义的初始化方法
+				// 利用反射机制执行
 				invokeCustomInitMethod(beanName, bean, mbd);
 			}
 		}

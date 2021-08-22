@@ -31,34 +31,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Default {@link BeanWrapper} implementation that should be sufficient
- * for all typical use cases. Caches introspection results for efficiency.
- *
- * <p>Note: Auto-registers default property editors from the
- * {@code org.springframework.beans.propertyeditors} package, which apply
- * in addition to the JDK's standard PropertyEditors. Applications can call
- * the {@link #registerCustomEditor(Class, java.beans.PropertyEditor)} method
- * to register an editor for a particular instance (i.e. they are not shared
- * across the application). See the base class
- * {@link PropertyEditorRegistrySupport} for details.
- *
- * <p><b>NOTE: As of Spring 2.5, this is - for almost all purposes - an
- * internal class.</b> It is just public in order to allow for access from
- * other framework packages. For standard application access purposes, use the
- * {@link PropertyAccessorFactory#forBeanPropertyAccess} factory method instead.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @author Rob Harrop
- * @author Stephane Nicoll
- * @since 15 April 2001
- * @see #registerCustomEditor
- * @see #setPropertyValues
- * @see #setPropertyValue
- * @see #getPropertyValue
- * @see #getPropertyType
- * @see BeanWrapper
- * @see PropertyEditorRegistrySupport
+ * 该类其主要作用是对 Bean 进行“包裹”，
+ * 然后对这个包裹的 bean 进行操作，比如后续注入 bean 属性。
  */
 public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements BeanWrapper {
 
