@@ -50,16 +50,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Base {@link ConversionService} implementation suitable for use in most environments.
- * Indirectly implements {@link ConverterRegistry} as registration API through the
- * {@link ConfigurableConversionService} interface.
- *
- * @author Keith Donald
- * @author Juergen Hoeller
- * @author Chris Beams
- * @author Phillip Webb
- * @author David Haraburda
- * @since 3.0
+ * 基础实现，适用于大部分条件下的转换工作，通过 ConfigurableConversionService 接口间接地将 ConverterRegistry 实现为注册 API 。
  */
 public class GenericConversionService implements ConfigurableConversionService {
 
@@ -74,9 +65,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static final GenericConverter NO_MATCH = new NoOpConverter("NO_MATCH");
 
-
+	/**
+	 * 所有 Converter 集合的封装对象
+	 */
 	private final Converters converters = new Converters();
 
+	/**
+	 * GenericConverter 缓存
+	 */
 	private final Map<ConverterCacheKey, GenericConverter> converterCache = new ConcurrentReferenceHashMap<>(64);
 
 
@@ -84,14 +80,22 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@Override
 	public void addConverter(Converter<?, ?> converter) {
+
+		// <1> 获取 ResolvableType 对象，基于 converter.getClass() 类
 		ResolvableType[] typeInfo = getRequiredTypeInfo(converter.getClass(), Converter.class);
+
+		// <2> 如果获取不到，并且 converter 是 DecoratingProxy 类型，则基于 ((DecoratingProxy) converter).getDecoratedClass() 类
 		if (typeInfo == null && converter instanceof DecoratingProxy) {
 			typeInfo = getRequiredTypeInfo(((DecoratingProxy) converter).getDecoratedClass(), Converter.class);
 		}
+
+		// 如果获取不到，抛出 IllegalArgumentException 异常
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
 					"Converter [" + converter.getClass().getName() + "]; does the class parameterize those types?");
 		}
+
+		// <2> 封装成 ConverterAdapter 对象，添加到 converters 中
 		addConverter(new ConverterAdapter(converter, typeInfo[0], typeInfo[1]));
 	}
 
@@ -179,19 +183,33 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Nullable
 	public Object convert(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Assert.notNull(targetType, "Target type to convert to cannot be null");
+
+		// <1> 如果 sourceType 为空，则直接处理结果
 		if (sourceType == null) {
 			Assert.isTrue(source == null, "Source must be [null] if source type == [null]");
 			return handleResult(null, targetType, convertNullSource(null, targetType));
 		}
+
+		// <2> 如果类型不对，抛出 IllegalArgumentException 异常
 		if (source != null && !sourceType.getObjectType().isInstance(source)) {
 			throw new IllegalArgumentException("Source to convert from must be an instance of [" +
 					sourceType + "]; instead it was a [" + source.getClass().getName() + "]");
 		}
+
+		// <3> 获得对应的 GenericConverter 对象
 		GenericConverter converter = getConverter(sourceType, targetType);
+
+		// <4> 如果 converter 非空，则进行转换，然后再处理结果
 		if (converter != null) {
+
+			// <4.1> 执行转换
 			Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
+
+			// <4.2> 处理器结果
 			return handleResult(sourceType, targetType, result);
 		}
+
+		// <5> 处理 converter 为空的情况
 		return handleConverterNotFound(source, sourceType, targetType);
 	}
 
@@ -311,10 +329,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 	private Object handleConverterNotFound(
 			@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 
+		// 情况一，如果 source 为空，则返回空
 		if (source == null) {
 			assertNotPrimitiveTargetType(sourceType, targetType);
 			return null;
 		}
+
+		// 情况二，如果 sourceType 为空，或者 targetType 是 sourceType 的子类，则返回 source
 		if ((sourceType == null || sourceType.isAssignableTo(targetType)) &&
 				targetType.getObjectType().isInstance(source)) {
 			return source;
@@ -496,7 +517,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 
 	/**
-	 * Manages all converters registered with the service.
+	 * 用于管理所有注册的转换器，其内部维护一个 Set 和 Map 的数据结构用于管理转换器
 	 */
 	private static class Converters {
 

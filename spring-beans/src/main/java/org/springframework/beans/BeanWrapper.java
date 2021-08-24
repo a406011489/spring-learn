@@ -19,32 +19,30 @@ package org.springframework.beans;
 import java.beans.PropertyDescriptor;
 
 /**
- * The central interface of Spring's low-level JavaBeans infrastructure.
+ * BeanWrapper 是一个从 BeanDefinition 到 Bean 直接的中间产物，我们可以称它为”低级 bean“。
+ * 在一般情况下，我们不会在实际项目中用到它。而是通过 BeanFactory 或者 DataBinder 隐式使用。
+ * 它提供分析和操作标准 JavaBeans 的操作：获取和设置属性值、获取属性描述符以及查询属性的可读性/可写性的能力。
  *
- * <p>Typically not used directly but rather implicitly via a
- * {@link org.springframework.beans.factory.BeanFactory} or a
- * {@link org.springframework.validation.DataBinder}.
+ * BeanWrapper 是 Spring 框架中重要的组件类，它就相当于一个代理类，
+ * Spring 委托 BeanWrapper 完成 Bean 属性的填充工作。在 Bean 实例被 InstantiationStrategy 创建出来后，
+ * Spring 容器会将 Bean 实例通过 BeanWrapper 包裹起来
  *
- * <p>Provides operations to analyze and manipulate standard JavaBeans:
- * the ability to get and set property values (individually or in bulk),
- * get property descriptors, and query the readability/writability of properties.
+ * 该接口主要继承核心三个接口
  *
- * <p>This interface supports <b>nested properties</b> enabling the setting
- * of properties on subproperties to an unlimited depth.
+ * PropertyAccessor：
+ * 可以访问属性的通用型接口（例如对象的 bean 属性或者对象中的字段），作为 BeanWrapper 的基础接口。
  *
- * <p>A BeanWrapper's default for the "extractOldValueForEditor" setting
- * is "false", to avoid side effects caused by getter method invocations.
- * Turn this to "true" to expose present property values to custom editors.
+ * PropertyEditorRegistr：
+ * 用于注册 JavaBean 的 PropertyEditors，
+ * 对 PropertyEditorRegistrar 起核心作用的中心接口。由 BeanWrapper 扩展，BeanWrapperImpl 和 DataBinder 实现。
  *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @since 13 April 2001
- * @see PropertyAccessor
- * @see PropertyEditorRegistry
- * @see PropertyAccessorFactory#forBeanPropertyAccess
- * @see org.springframework.beans.factory.BeanFactory
- * @see org.springframework.validation.BeanPropertyBindingResult
- * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
+ * TypeConverter：
+ * 定义类型转换的接口，通常与 PropertyEditorRegistry 接口一起实现（但不是必须），
+ * 但由于 TypeConverter 是基于线程不安全的 PropertyEditors ，因此 TypeConverters 本身也不被视为线程安全。
+ * 在 Spring 3 后，不在采用 PropertyEditors 类作为 Spring 默认的类型转换接口，
+ * 而是采用 ConversionService 体系，但 ConversionService 是线程安全的，
+ * 所以在 Spring 3 后，如果你所选择的类型转换器是 ConversionService 而不是 PropertyEditors 那么 TypeConverters 则是线程安全的。
+ *
  */
 public interface BeanWrapper extends ConfigurablePropertyAccessor {
 

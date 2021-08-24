@@ -34,23 +34,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract base class for {@link Environment} implementations. Supports the notion of
- * reserved default profile names and enables specifying active and default profiles
- * through the {@link #ACTIVE_PROFILES_PROPERTY_NAME} and
- * {@link #DEFAULT_PROFILES_PROPERTY_NAME} properties.
+ * Environment 的基础实现
  *
- * <p>Concrete subclasses differ primarily on which {@link PropertySource} objects they
- * add by default. {@code AbstractEnvironment} adds none. Subclasses should contribute
- * property sources through the protected {@link #customizePropertySources(MutablePropertySources)}
- * hook, while clients should customize using {@link ConfigurableEnvironment#getPropertySources()}
- * and working against the {@link MutablePropertySources} API.
- * See {@link ConfigurableEnvironment} javadoc for usage examples.
- *
- * @author Chris Beams
- * @author Juergen Hoeller
- * @since 3.1
- * @see ConfigurableEnvironment
- * @see StandardEnvironment
+ * 允许通过设置 ACTIVE_PROFILES_PROPERTY_NAME 和DEFAULT_PROFILES_PROPERTY_NAME 属性指定活动和默认配置文件。
+ * 子类的主要区别在于它们默认添加的 PropertySource 对象。
+ * 而 AbstractEnvironment 则没有添加任何内容。
  */
 public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
@@ -234,9 +222,16 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected Set<String> doGetActiveProfiles() {
 		synchronized (this.activeProfiles) {
+
+			// 如果 activeProfiles 为空，则进行初始化
 			if (this.activeProfiles.isEmpty()) {
+
+				// 获得 ACTIVE_PROFILES_PROPERTY_NAME 对应的 profiles 属性值
 				String profiles = getProperty(ACTIVE_PROFILES_PROPERTY_NAME);
+
 				if (StringUtils.hasText(profiles)) {
+
+					// 设置到 activeProfiles 中
 					setActiveProfiles(StringUtils.commaDelimitedListToStringArray(
 							StringUtils.trimAllWhitespace(profiles)));
 				}

@@ -86,7 +86,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * 该类为最终的默认实现类，它实现了BeanFactory的所有接口。
+ * 该类为BeanDefinitionRegistry最终的默认实现类，它实现了BeanFactory的所有接口。
+ *
+ * 一个基于 BeanDefinition 元数据的完整 bean 工厂。所以相对于 SimpleBeanDefinitionRegistry 而言，
+ * DefaultListableBeanFactory 则是一个具有注册功能的完整 Bean 工厂。
+ * 它同样是用 ConcurrentHashMap 数据结构来存储注册的 BeanDefinition 。
  */
 @SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory

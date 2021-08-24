@@ -22,7 +22,12 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.AliasRegistry;
 
 /**
- * BeanDefinition 的注册
+ * 将定义 Bean 的资源文件解析成 BeanDefinition 后需要将其注入容器中，这个过程由 BeanDefinitionRegistry 来完成。
+ *
+ * BeanDefinition 的注册接口，如 RootBeanDefinition 和 ChildBeanDefinition。
+ * 它通常由 BeanFactories 实现，
+ * 在 Spring 中已知的实现者为：DefaultListableBeanFactory 和 GenericApplicationContext。
+ * BeanDefinitionRegistry 是 Spring 的 Bean 工厂包中唯一封装 BeanDefinition 注册的接口。
  */
 public interface BeanDefinitionRegistry extends AliasRegistry {
 

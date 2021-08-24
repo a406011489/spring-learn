@@ -26,13 +26,7 @@ import java.util.stream.StreamSupport;
 import org.springframework.lang.Nullable;
 
 /**
- * Holder containing one or more {@link PropertyValue} objects,
- * typically comprising one update for a specific target bean.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @since 13 May 2001
- * @see PropertyValue
+ * PropertyValue 用于保存单个 bean 属性的信息和值的对象。
  */
 public interface PropertyValues extends Iterable<PropertyValue> {
 

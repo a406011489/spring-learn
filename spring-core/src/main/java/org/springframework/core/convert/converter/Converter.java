@@ -20,17 +20,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A converter converts a source object of type {@code S} to a target of type {@code T}.
- *
- * <p>Implementations of this interface are thread-safe and can be shared.
- *
- * <p>Implementations may additionally implement {@link ConditionalConverter}.
- *
- * @author Keith Donald
- * @author Josh Cummings
- * @since 3.0
- * @param <S> the source type
- * @param <T> the target type
+ * 将 <S> 类型的源对象转换为 <T> 类型的目标对象的转换器。该接口是线程安全的，所以可以共享。
  */
 @FunctionalInterface
 public interface Converter<S, T> {

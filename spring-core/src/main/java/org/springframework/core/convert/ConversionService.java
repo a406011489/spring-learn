@@ -19,12 +19,7 @@ package org.springframework.core.convert;
 import org.springframework.lang.Nullable;
 
 /**
- * A service interface for type conversion. This is the entry point into the convert system.
- * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
- *
- * @author Keith Donald
- * @author Phillip Webb
- * @since 3.0
+ * ConversionService 是自 Spring 3 后推出来用来替代 PropertyEditor 转换模式的转换体系，接口定义如下：
  */
 public interface ConversionService {
 
