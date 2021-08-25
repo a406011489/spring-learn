@@ -17,35 +17,12 @@
 package org.springframework.context;
 
 /**
- * A common interface defining methods for start/stop lifecycle control.
- * The typical use case for this is to control asynchronous processing.
- * <b>NOTE: This interface does not imply specific auto-startup semantics.
- * Consider implementing {@link SmartLifecycle} for that purpose.</b>
+ * Lifecycle ，一个用于管理声明周期的接口。
  *
- * <p>Can be implemented by both components (typically a Spring bean defined in a
- * Spring context) and containers  (typically a Spring {@link ApplicationContext}
- * itself). Containers will propagate start/stop signals to all components that
- * apply within each container, e.g. for a stop/restart scenario at runtime.
+ * 在 AbstractApplicationContext 中存在一个 LifecycleProcessor 类型的实例对象 lifecycleProcessor ，
+ * AbstractApplicationContext 中关于 Lifecycle 接口的实现都是委托给 lifecycleProcessor 实现的。
  *
- * <p>Can be used for direct invocations or for management operations via JMX.
- * In the latter case, the {@link org.springframework.jmx.export.MBeanExporter}
- * will typically be defined with an
- * {@link org.springframework.jmx.export.assembler.InterfaceBasedMBeanInfoAssembler},
- * restricting the visibility of activity-controlled components to the Lifecycle
- * interface.
- *
- * <p>Note that the present {@code Lifecycle} interface is only supported on
- * <b>top-level singleton beans</b>. On any other component, the {@code Lifecycle}
- * interface will remain undetected and hence ignored. Also, note that the extended
- * {@link SmartLifecycle} interface provides sophisticated integration with the
- * application context's startup and shutdown phases.
- *
- * @author Juergen Hoeller
- * @since 2.0
- * @see SmartLifecycle
- * @see ConfigurableApplicationContext
- * @see org.springframework.jms.listener.AbstractMessageListenerContainer
- * @see org.springframework.scheduling.quartz.SchedulerFactoryBean
+ * 在启动、停止的时候会分别发布 ContextStartedEvent 和 ContextStoppedEvent 事件。
  */
 public interface Lifecycle {
 

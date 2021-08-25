@@ -24,30 +24,18 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Standalone XML application context, taking the context definition files
- * from the class path, interpreting plain paths as class path resource names
- * that include the package path (e.g. "mypackage/myresource.txt"). Useful for
- * test harnesses as well as for application contexts embedded within JARs.
+ * ClassPathXmlApplicationContext 涉及的顶级接口有：
  *
- * <p>The config location defaults can be overridden via {@link #getConfigLocations},
- * Config locations can either denote concrete files like "/myfiles/context.xml"
- * or Ant-style patterns like "/myfiles/*-context.xml" (see the
- * {@link org.springframework.util.AntPathMatcher} javadoc for pattern details).
+ * BeanFactory：Spring 容器 Bean 的管理
+ * MessageSource：管理 message ，实现国际化等功能
+ * ApplicationEventPublisher：事件发布
+ * ResourcePatternResolver：资源加载
+ * EnvironmentCapable：系统 Environment（profile + Properties） 相关
+ * Lifecycle：管理生命周期
+ * Closable：关闭，释放资源
+ * InitializingBean：自定义初始化
+ * BeanNameAware：设置 beanName 的 Aware 接口
  *
- * <p>Note: In case of multiple config locations, later bean definitions will
- * override ones defined in earlier loaded files. This can be leveraged to
- * deliberately override certain bean definitions via an extra XML file.
- *
- * <p><b>This is a simple, one-stop shop convenience ApplicationContext.
- * Consider using the {@link GenericApplicationContext} class in combination
- * with an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}
- * for more flexible context setup.</b>
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @see #getResource
- * @see #getResourceByPath
- * @see GenericApplicationContext
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 
