@@ -24,6 +24,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ *
+ * 从类的根路径下加载配置⽂件（推荐使⽤）
  * ClassPathXmlApplicationContext 涉及的顶级接口有：
  *
  * BeanFactory：Spring 容器 Bean 的管理

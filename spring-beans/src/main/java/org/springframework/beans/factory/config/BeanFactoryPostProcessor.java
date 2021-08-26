@@ -20,6 +20,12 @@ import org.springframework.beans.BeansException;
 
 /**
  * 该机制作用于容器启动阶段，允许我们在容器实例化 Bean 之前对注册到该容器的 BeanDefinition 做出修改。
+ *
+ * Spring提供了两种后处理bean的扩展接⼝，分别为 BeanPostProcessor 和 BeanFactoryPostProcessor，两者在使⽤上是有所区别的。
+ * 在BeanFactory初始化之后可以使⽤BeanFactoryPostProcessor进⾏后置处理做⼀些事情
+ * 在Bean对象实例化（并不是Bean的整个⽣命周期完成）之后可以使⽤BeanPostProcessor进⾏后置处理做⼀些事情
+ *
+ * BeanFactory级别的处理，是针对整个Bean的⼯⼚进⾏处理，典型应⽤:PropertyPlaceholderConfigurer
  */
 @FunctionalInterface
 public interface BeanFactoryPostProcessor {

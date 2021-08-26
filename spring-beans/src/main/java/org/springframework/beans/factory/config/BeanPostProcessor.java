@@ -23,21 +23,17 @@ import org.springframework.lang.Nullable;
  * 可以理解为是 Spring 的一个工厂钩子（其实 Spring 提供一系列的钩子，如 Aware 、InitializingBean、DisposableBean）
  * 它是 Spring 提供的对象实例化阶段强有力的扩展点，允许 Spring 在实例化 bean 阶段对其进行定制化修改，
  * 比较常见的使用场景是处理标记接口实现类或者为当前对象提供代理实现（例如 AOP）。
+ *
+ * Spring提供了两种后处理bean的扩展接⼝，分别为 BeanPostProcessor 和 BeanFactoryPostProcessor，两者在使⽤上是有所区别的。
+ * 在BeanFactory初始化之后可以使⽤BeanFactoryPostProcessor进⾏后置处理做⼀些事情
+ * 在Bean对象实例化（并不是Bean的整个⽣命周期完成）之后可以使⽤BeanPostProcessor进⾏后置处理做⼀些事情
  */
 public interface BeanPostProcessor {
 
 	/**
-	 * Apply this {@code BeanPostProcessor} to the given new bean instance <i>before</i> any bean
-	 * initialization callbacks (like InitializingBean's {@code afterPropertiesSet}
-	 * or a custom init-method). The bean will already be populated with property values.
-	 * The returned bean instance may be a wrapper around the original.
-	 * <p>The default implementation returns the given {@code bean} as-is.
-	 * @param bean the new bean instance
-	 * @param beanName the name of the bean
-	 * @return the bean instance to use, either the original or a wrapped one;
-	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
-	 * @throws org.springframework.beans.BeansException in case of errors
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
+	 * 第⼀个参数是每个bean的实例，第⼆个参数是每个bean的name或者id属性的值。
+	 *
+	 * 所以我们可以通过第⼆个参数，来判断我们将要处理的具体的bean
 	 */
 	@Nullable
 	default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

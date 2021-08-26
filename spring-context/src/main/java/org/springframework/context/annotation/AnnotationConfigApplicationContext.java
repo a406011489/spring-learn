@@ -29,29 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Standalone application context, accepting <em>component classes</em> as input &mdash;
- * in particular {@link Configuration @Configuration}-annotated classes, but also plain
- * {@link org.springframework.stereotype.Component @Component} types and JSR-330 compliant
- * classes using {@code javax.inject} annotations.
- *
- * <p>Allows for registering classes one by one using {@link #register(Class...)}
- * as well as for classpath scanning using {@link #scan(String...)}.
- *
- * <p>In case of multiple {@code @Configuration} classes, {@link Bean @Bean} methods
- * defined in later classes will override those defined in earlier classes. This can
- * be leveraged to deliberately override certain bean definitions via an extra
- * {@code @Configuration} class.
- *
- * <p>See {@link Configuration @Configuration}'s javadoc for usage examples.
- *
- * @author Juergen Hoeller
- * @author Chris Beams
- * @since 3.0
- * @see #register
- * @see #scan
- * @see AnnotatedBeanDefinitionReader
- * @see ClassPathBeanDefinitionScanner
- * @see org.springframework.context.support.GenericXmlApplicationContext
+ * 纯注解模式下启动Spring容器
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
