@@ -554,19 +554,21 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// 准备刷新上下文环境
 			prepareRefresh();
 
-			// 创建并初始化 BeanFactory
+			// 创建并初始化 BeanFactory，默认实现是DefaultListableBeanFactory
+			// 加载BeanDefinition 并注册到 BeanDefinitionRegistry
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
-			// 填充BeanFactory功能
+			// 填充BeanFactory功能 （BeanFactory进⾏⼀些设置，⽐如context的类加载器等
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// 提供子类覆盖的额外处理，即子类处理自定义的BeanFactoryPostProcess
+				// BeanFactory准备工作完成后进⾏的后置处理⼯作
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 
-				// 激活各种BeanFactory处理器
+				// 激活各种BeanFactory处理器 实例化并调⽤实现了BeanFactoryPostProcessor接⼝的Bean
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// 注册拦截Bean创建的Bean处理器，即注册 BeanPostProcessor
@@ -586,6 +588,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				registerListeners();
 
 				// 初始化剩下的单例Bean(非延迟加载的)
+				// 类的构造函数、InitializingBean中afterPropertiesSet方法，就是在此时被调用的
+				// 初始化所有剩下的⾮懒加载的单例bean（未设置属性）
 				finishBeanFactoryInitialization(beanFactory);
 
 				// 完成刷新过程,通知生命周期处理器lifecycleProcessor刷新过程,同时发出ContextRefreshEvent通知别人
