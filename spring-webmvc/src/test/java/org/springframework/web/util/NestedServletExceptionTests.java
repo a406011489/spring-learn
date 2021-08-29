@@ -28,6 +28,7 @@ public class NestedServletExceptionTests {
 	public void testNestedServletExceptionString() {
 		NestedServletException exception = new NestedServletException("foo");
 		assertThat(exception.getMessage()).isEqualTo("foo");
+		System.out.println("mvc 构建测试");
 	}
 
 	@Test
