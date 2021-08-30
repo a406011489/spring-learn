@@ -57,38 +57,8 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	}
 
 	/**
-	 * Create a new {@code ContextLoaderListener} with the given application context. This
-	 * constructor is useful in Servlet 3.0+ environments where instance-based
-	 * registration of listeners is possible through the {@link javax.servlet.ServletContext#addListener}
-	 * API.
-	 * <p>The context may or may not yet be {@linkplain
-	 * org.springframework.context.ConfigurableApplicationContext#refresh() refreshed}. If it
-	 * (a) is an implementation of {@link ConfigurableWebApplicationContext} and
-	 * (b) has <strong>not</strong> already been refreshed (the recommended approach),
-	 * then the following will occur:
-	 * <ul>
-	 * <li>If the given context has not already been assigned an {@linkplain
-	 * org.springframework.context.ConfigurableApplicationContext#setId id}, one will be assigned to it</li>
-	 * <li>{@code ServletContext} and {@code ServletConfig} objects will be delegated to
-	 * the application context</li>
-	 * <li>{@link #customizeContext} will be called</li>
-	 * <li>Any {@link org.springframework.context.ApplicationContextInitializer ApplicationContextInitializer org.springframework.context.ApplicationContextInitializer ApplicationContextInitializers}
-	 * specified through the "contextInitializerClasses" init-param will be applied.</li>
-	 * <li>{@link org.springframework.context.ConfigurableApplicationContext#refresh refresh()} will be called</li>
-	 * </ul>
-	 * If the context has already been refreshed or does not implement
-	 * {@code ConfigurableWebApplicationContext}, none of the above will occur under the
-	 * assumption that the user has performed these actions (or not) per his or her
-	 * specific needs.
-	 * <p>See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
-	 * <p>In any case, the given application context will be registered into the
-	 * ServletContext under the attribute name {@link
-	 * WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE} and the Spring
-	 * application context will be closed when the {@link #contextDestroyed} lifecycle
-	 * method is invoked on this listener.
-	 * @param context the application context to manage
-	 * @see #contextInitialized(ServletContextEvent)
-	 * @see #contextDestroyed(ServletContextEvent)
+	 * 第二个构造方法，可以直接传递一个 WebApplicationContext 对象，
+	 * 那样，实际 ContextLoaderListener 就无需在创建一个新的 WebApplicationContext 对象。
 	 */
 	public ContextLoaderListener(WebApplicationContext context) {
 		super(context);
@@ -100,6 +70,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
+		// 初始化 WebApplicationContext
 		initWebApplicationContext(event.getServletContext());
 	}
 

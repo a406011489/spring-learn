@@ -67,10 +67,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @author Rob Harrop
- * @author Sam Brannen
+ * DispatcherServlet 测试类
  */
 public class DispatcherServletTests {
 

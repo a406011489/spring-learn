@@ -67,7 +67,7 @@ import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * DispatcherServlet 总控制器
+ * 负责初始化 Spring MVC 的各个组件，以及处理客户端的请求。
  */
 @SuppressWarnings("serial")
 public class DispatcherServlet extends FrameworkServlet {
@@ -397,8 +397,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the strategy objects that this servlet uses.
-	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
+	 * 初始化各式各样的对象
 	 */
 	protected void initStrategies(ApplicationContext context) {
 		initMultipartResolver(context);
