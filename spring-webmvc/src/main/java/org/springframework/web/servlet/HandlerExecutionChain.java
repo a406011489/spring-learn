@@ -31,19 +31,20 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Handler execution chain, consisting of handler object and any handler interceptors.
- * Returned by HandlerMapping's {@link HandlerMapping#getHandler} method.
- *
- * @author Juergen Hoeller
- * @since 20.06.2003
- * @see HandlerInterceptor
+ * 该类包含处理器(handler)和拦截器们(HandlerInterceptor数组)。
  */
 public class HandlerExecutionChain {
 
 	private static final Log logger = LogFactory.getLog(HandlerExecutionChain.class);
 
+	/**
+	 * 处理器
+	 */
 	private final Object handler;
 
+	/**
+	 * 拦截器数组
+	 */
 	private final List<HandlerInterceptor> interceptorList = new ArrayList<>();
 
 	private int interceptorIndex = -1;

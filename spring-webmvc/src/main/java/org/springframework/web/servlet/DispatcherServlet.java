@@ -397,17 +397,37 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * 初始化各式各样的对象
+	 * 初始化各式各样的组件
+	 *
+	 * 一共有9个组件
 	 */
 	protected void initStrategies(ApplicationContext context) {
+
+		// 初始化 MultipartResolver
 		initMultipartResolver(context);
+
+		// 初始化 LocaleResolver
 		initLocaleResolver(context);
+
+		// 初始化 ThemeResolver
 		initThemeResolver(context);
+
+		// 初始化 HandlerMappings
 		initHandlerMappings(context);
+
+		// 初始化 HandlerAdapters
 		initHandlerAdapters(context);
+
+		// 初始化 HandlerExceptionResolvers
 		initHandlerExceptionResolvers(context);
+
+		// 初始化 RequestToViewNameTranslator
 		initRequestToViewNameTranslator(context);
+
+		// 初始化 ViewResolvers
 		initViewResolvers(context);
+
+		// 初始化 FlashMapManager
 		initFlashMapManager(context);
 	}
 
@@ -436,9 +456,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the LocaleResolver used by this class.
-	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
-	 * we default to AcceptHeaderLocaleResolver.
+	 * 本地化( 国际化 )解析器接口。
 	 */
 	private void initLocaleResolver(ApplicationContext context) {
 		try {
@@ -486,9 +504,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the HandlerMappings used by this class.
-	 * <p>If no HandlerMapping beans are defined in the BeanFactory for this namespace,
-	 * we default to BeanNameUrlHandlerMapping.
+	 * 处理器匹配接口，根据请求( handler )获得其的处理器( handler )和拦截器们( HandlerInterceptor 数组 )。
 	 */
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
@@ -532,9 +548,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the HandlerAdapters used by this class.
-	 * <p>If no HandlerAdapter beans are defined in the BeanFactory for this namespace,
-	 * we default to SimpleControllerHandlerAdapter.
+	 * 处理器适配器接口。
 	 */
 	private void initHandlerAdapters(ApplicationContext context) {
 		this.handlerAdapters = null;
@@ -571,9 +585,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the HandlerExceptionResolver used by this class.
-	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
-	 * we default to no exception resolver.
+	 * 处理器异常解析器接口，将处理器( handler )执行时发生的异常，解析( 转换 )成对应的 ModelAndView 结果。
 	 */
 	private void initHandlerExceptionResolvers(ApplicationContext context) {
 		this.handlerExceptionResolvers = null;
@@ -611,8 +623,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the RequestToViewNameTranslator used by this servlet instance.
-	 * <p>If no implementation is configured then we default to DefaultRequestToViewNameTranslator.
+	 * 请求到视图名的转换器接口。
 	 */
 	private void initRequestToViewNameTranslator(ApplicationContext context) {
 		try {
@@ -636,9 +647,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the ViewResolvers used by this class.
-	 * <p>If no ViewResolver beans are defined in the BeanFactory for this
-	 * namespace, we default to InternalResourceViewResolver.
+	 * 实体解析器接口，根据视图名和国际化，获得最终的视图 View 对象。
 	 */
 	private void initViewResolvers(ApplicationContext context) {
 		this.viewResolvers = null;
@@ -675,9 +684,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the {@link FlashMapManager} used by this servlet instance.
-	 * <p>If no implementation is configured then we default to
-	 * {@code org.springframework.web.servlet.support.DefaultFlashMapManager}.
+	 * FlashMap 管理器接口，负责重定向时，保存参数到临时存储中。
 	 */
 	private void initFlashMapManager(ApplicationContext context) {
 		try {
