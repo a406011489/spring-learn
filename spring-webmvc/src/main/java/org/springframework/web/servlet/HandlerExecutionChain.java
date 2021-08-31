@@ -79,6 +79,8 @@ public class HandlerExecutionChain {
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
+
+			// 初始化到 interceptorList 中
 			this.interceptorList.addAll(originalChain.interceptorList);
 		}
 		else {
@@ -103,8 +105,7 @@ public class HandlerExecutionChain {
 	}
 
 	/**
-	 * Add the given interceptor at the specified index of this chain.
-	 * @since 5.2
+	 * 添加拦截器到 interceptorList 中。
 	 */
 	public void addInterceptor(int index, HandlerInterceptor interceptor) {
 		this.interceptorList.add(index, interceptor);
@@ -123,13 +124,12 @@ public class HandlerExecutionChain {
 	 */
 	@Nullable
 	public HandlerInterceptor[] getInterceptors() {
+		// 将 interceptorList 初始化到 interceptors 中
 		return (!this.interceptorList.isEmpty() ? this.interceptorList.toArray(new HandlerInterceptor[0]) : null);
 	}
 
 	/**
-	 * Return the list of interceptors to apply (in the given order).
-	 * @return the list of HandlerInterceptors instances (potentially empty)
-	 * @since 5.3
+	 * 获得 interceptors 数组。
 	 */
 	public List<HandlerInterceptor> getInterceptorList() {
 		return (!this.interceptorList.isEmpty() ? Collections.unmodifiableList(this.interceptorList) :
@@ -138,29 +138,39 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Apply preHandle methods of registered interceptors.
-	 * @return {@code true} if the execution chain should proceed with the
-	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
-	 * that this interceptor has already dealt with the response itself.
+	 * 应用拦截器的前置处理。
 	 */
 	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+		// <2> 遍历拦截器数组
 		for (int i = 0; i < this.interceptorList.size(); i++) {
 			HandlerInterceptor interceptor = this.interceptorList.get(i);
+
+			// <3> 前置处理
 			if (!interceptor.preHandle(request, response, this.handler)) {
+
+				// <3.1> 触发已完成处理
 				triggerAfterCompletion(request, response, null);
+
+				// 返回 false ，前置处理失败
 				return false;
 			}
+
+			// <3.2> 标记 interceptorIndex 位置
 			this.interceptorIndex = i;
 		}
+
+		// <4> 返回 true ，前置处理成功
 		return true;
 	}
 
 	/**
-	 * Apply postHandle methods of registered interceptors.
+	 * 应用拦截器的后置处理。
 	 */
 	void applyPostHandle(HttpServletRequest request, HttpServletResponse response, @Nullable ModelAndView mv)
 			throws Exception {
 
+		// 同样的，倒序后置处理
 		for (int i = this.interceptorList.size() - 1; i >= 0; i--) {
 			HandlerInterceptor interceptor = this.interceptorList.get(i);
 			interceptor.postHandle(request, response, this.handler, mv);
@@ -168,17 +178,18 @@ public class HandlerExecutionChain {
 	}
 
 	/**
-	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
-	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
-	 * has successfully completed and returned true.
+	 * 触发拦截器的已完成处理。
 	 */
 	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex) {
+
+		// 进行倒序处理！！！
 		for (int i = this.interceptorIndex; i >= 0; i--) {
 			HandlerInterceptor interceptor = this.interceptorList.get(i);
 			try {
+				// 已完成处理
 				interceptor.afterCompletion(request, response, this.handler, ex);
 			}
-			catch (Throwable ex2) {
+			catch (Throwable ex2) { // 注意，如果执行失败，仅仅会打印错误日志，不会结束循环
 				logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
 			}
 		}

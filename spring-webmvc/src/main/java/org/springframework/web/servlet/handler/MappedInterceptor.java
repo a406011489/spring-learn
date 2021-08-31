@@ -36,41 +36,32 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * Wraps a {@link HandlerInterceptor} and uses URL patterns to determine whether
- * it applies to a given request.
- *
- * <p>Pattern matching can be done with {@link PathMatcher} or with parsed
- * {@link PathPattern}. The syntax is largely the same with the latter being more
- * tailored for web usage and more efficient. The choice is driven by the
- * presence of a {@link UrlPathHelper#resolveAndCacheLookupPath resolved}
- * {@code String} lookupPath or a {@link ServletRequestPathUtils#parseAndCache
- * parsed} {@code RequestPath} which in turn depends on the
- * {@link HandlerMapping} that matched the current request.
- *
- * <p>{@code MappedInterceptor} is supported by sub-classes of
- * {@link org.springframework.web.servlet.handler.AbstractHandlerMethodMapping
- * AbstractHandlerMethodMapping} which detect beans of type
- * {@code MappedInterceptor} and also check if interceptors directly registered
- * with it are of this type.
- *
- * @author Keith Donald
- * @author Rossen Stoyanchev
- * @author Brian Clozel
- * @since 3.0
+ * 支持地址匹配的 HandlerInterceptor 实现类。
  */
 public final class MappedInterceptor implements HandlerInterceptor {
 
 	private static PathMatcher defaultPathMatcher = new AntPathMatcher();
 
-
+	/**
+	 * 匹配的路径
+	 */
 	@Nullable
 	private final PathPattern[] includePatterns;
 
+	/**
+	 * 不匹配的路径
+	 */
 	@Nullable
 	private final PathPattern[] excludePatterns;
 
+	/**
+	 * 路径匹配器
+	 */
 	private PathMatcher pathMatcher = defaultPathMatcher;
 
+	/**
+	 * HandlerInterceptor 拦截器对象
+	 */
 	private final HandlerInterceptor interceptor;
 
 
@@ -223,25 +214,27 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	/**
-	 * Determine a match for the given lookup path.
-	 * @param lookupPath the current request path
-	 * @param pathMatcher a path matcher for path pattern matching
-	 * @return {@code true} if the interceptor applies to the given request path
-	 * @deprecated as of 5.3 in favor of {@link #matches(HttpServletRequest)}
+	 * 判断路径是否匹配。
 	 */
 	@Deprecated
 	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
 		pathMatcher = (this.pathMatcher != defaultPathMatcher ? this.pathMatcher : pathMatcher);
 		if (!ObjectUtils.isEmpty(this.excludePatterns)) {
+
+			// 先排重
 			for (PathPattern pattern : this.excludePatterns) {
 				if (pathMatcher.match(pattern.getPatternString(), lookupPath)) {
 					return false;
 				}
 			}
 		}
+
+		// 特殊，如果包含为空，则默认就是包含
 		if (ObjectUtils.isEmpty(this.includePatterns)) {
 			return true;
 		}
+
+		// 后包含
 		for (PathPattern pattern : this.includePatterns) {
 			if (pathMatcher.match(pattern.getPatternString(), lookupPath)) {
 				return true;

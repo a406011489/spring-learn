@@ -56,37 +56,49 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
- * implementations. Supports ordering, a default handler, handler interceptors,
- * including handler interceptors mapped by path patterns.
+ * 该类实现了【获得请求对应的处理器和拦截器们】的骨架逻辑，而暴露getHandlerInternal方法交由子类实现。
  *
- * <p>Note: This base class does <i>not</i> support exposure of the
- * {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}. Support for this attribute
- * is up to concrete subclasses, typically based on request URL mappings.
- *
- * @author Juergen Hoeller
- * @author Rossen Stoyanchev
- * @since 07.04.2003
- * @see #getHandlerInternal
- * @see #setDefaultHandler
- * @see #setInterceptors
- * @see org.springframework.web.servlet.HandlerInterceptor
+ * 它的子类分为：
+ * 1、AbstractUrlHandlerMapping 系，基于 URL 进行匹配。当然实际开发我们已经不用了
+ * 2、AbstractHandlerMethodMapping 系，基于 Method 进行匹配。例如，我们所熟知的 @RequestMapping 等注解的方式。
  */
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
 
+	/**
+	 * 默认处理器。在获得不到处理器时，可使用该属性。
+	 */
 	@Nullable
 	private Object defaultHandler;
 
 	@Nullable
 	private PathPatternParser patternParser;
 
+	/**
+	 * URL 路径工具类
+	 */
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+	/**
+	 * 路径匹配器
+	 */
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	/**
+	 * 配置的拦截器数组.
+	 *
+	 * 在 {@link #initInterceptors()} 方法中，初始化到 {@link #adaptedInterceptors} 中
+	 *
+	 * 添加方式有两种：
+	 *
+	 * 1. {@link #setInterceptors(Object...)} 方法
+	 * 2. {@link #extendInterceptors(List)} 方法
+	 */
 	private final List<Object> interceptors = new ArrayList<>();
 
+	/**
+	 * 初始化后的拦截器 HandlerInterceptor 数组
+	 */
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
 	@Nullable
@@ -94,8 +106,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
+	/**
+	 * 顺序
+	 */
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
 
+	/**
+	 * Bean 名字
+	 */
 	@Nullable
 	private String beanName;
 
@@ -363,14 +381,21 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 
 	/**
-	 * Initializes the interceptors.
-	 * @see #extendInterceptors(java.util.List)
-	 * @see #initInterceptors()
+	 * 初始化拦截器。
+	 *
+	 * 该方法，是对 WebApplicationObjectSupport 的覆写，而 WebApplicationObjectSupport 的继承关系是
+	 * WebApplicationObjectSupport => ApplicationObjectSupport => ApplicationContextAware 。
 	 */
 	@Override
 	protected void initApplicationContext() throws BeansException {
+
+		// <1> 空方法。交给子类实现，用于注册自定义的拦截器到 interceptors 中。目前暂无子类实现。
 		extendInterceptors(this.interceptors);
+
+		// <2> 扫描已注册的 MappedInterceptor 的 Bean 们，添加到 mappedInterceptors 中
 		detectMappedInterceptors(this.adaptedInterceptors);
+
+		// <3> 将 interceptors 初始化成 HandlerInterceptor 类型，添加到 mappedInterceptors 中
 		initInterceptors();
 	}
 
@@ -387,57 +412,53 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Detect beans of type {@link MappedInterceptor} and add them to the list
-	 * of mapped interceptors.
-	 * <p>This is called in addition to any {@link MappedInterceptor}s that may
-	 * have been provided via {@link #setInterceptors}, by default adding all
-	 * beans of type {@link MappedInterceptor} from the current context and its
-	 * ancestors. Subclasses can override and refine this policy.
-	 * @param mappedInterceptors an empty list to add to
+	 * 扫描已注册的 MappedInterceptor 的 Bean 们，添加到 mappedInterceptors 中。
 	 */
 	protected void detectMappedInterceptors(List<HandlerInterceptor> mappedInterceptors) {
+
+		// MappedInterceptor 会根据请求路径做匹配，是否进行拦截。
 		mappedInterceptors.addAll(BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				obtainApplicationContext(), MappedInterceptor.class, true, false).values());
 	}
 
 	/**
-	 * Initialize the specified interceptors adapting
-	 * {@link WebRequestInterceptor}s to {@link HandlerInterceptor}.
-	 * @see #setInterceptors
-	 * @see #adaptInterceptor
+	 * 调用 #initInterceptors() 方法，将 interceptors 初始化成 HandlerInterceptor 类型，添加到 mappedInterceptors 中。
 	 */
 	protected void initInterceptors() {
 		if (!this.interceptors.isEmpty()) {
+
+			// 遍历 interceptors 数组
 			for (int i = 0; i < this.interceptors.size(); i++) {
+
+				// 获得 interceptor 对象
 				Object interceptor = this.interceptors.get(i);
-				if (interceptor == null) {
+				if (interceptor == null) { // 若为空，抛出 IllegalArgumentException 异常
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
+
+				// 将 interceptors 初始化成 HandlerInterceptor 类型，添加到 mappedInterceptors 中
+				// 注意，HandlerInterceptor 无需进行路径匹配，直接拦截全部
 				this.adaptedInterceptors.add(adaptInterceptor(interceptor));
 			}
 		}
 	}
 
 	/**
-	 * Adapt the given interceptor object to {@link HandlerInterceptor}.
-	 * <p>By default, the supported interceptor types are
-	 * {@link HandlerInterceptor} and {@link WebRequestInterceptor}. Each given
-	 * {@link WebRequestInterceptor} is wrapped with
-	 * {@link WebRequestHandlerInterceptorAdapter}.
-	 * @param interceptor the interceptor
-	 * @return the interceptor downcast or adapted to HandlerInterceptor
-	 * @see org.springframework.web.servlet.HandlerInterceptor
-	 * @see org.springframework.web.context.request.WebRequestInterceptor
-	 * @see WebRequestHandlerInterceptorAdapter
+	 * 将 interceptors 初始化成 HandlerInterceptor 类型。
 	 */
 	protected HandlerInterceptor adaptInterceptor(Object interceptor) {
+
+		// HandlerInterceptor 类型，直接返回
 		if (interceptor instanceof HandlerInterceptor) {
 			return (HandlerInterceptor) interceptor;
 		}
+
+		// WebRequestInterceptor 类型，适配成 WebRequestHandlerInterceptorAdapter 对象，然后返回
 		else if (interceptor instanceof WebRequestInterceptor) {
 			return new WebRequestHandlerInterceptorAdapter((WebRequestInterceptor) interceptor);
 		}
-		else {
+
+		else { // 错误类型，抛出 IllegalArgumentException 异常
 			throw new IllegalArgumentException("Interceptor type not supported: " + interceptor.getClass().getName());
 		}
 	}
@@ -479,28 +500,32 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Look up a handler for the given request, falling back to the default
-	 * handler if no specific one is found.
-	 * @param request current HTTP request
-	 * @return the corresponding handler instance, or the default handler
-	 * @see #getHandlerInternal
+	 * 获得请求对应的 HandlerExecutionChain 对象。
 	 */
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+
+		// <1> 获得处理器。该方法是抽象方法，由子类实现
 		Object handler = getHandlerInternal(request);
+
+		// <2> 获得不到，则使用默认处理器
 		if (handler == null) {
 			handler = getDefaultHandler();
 		}
+
+		// <3> 还是获得不到，则返回 null
 		if (handler == null) {
 			return null;
 		}
-		// Bean name or resolved handler?
+
+		// <4> 如果找到的处理器是 String 类型，则从容器中找到 String 对应的 Bean 类型作为处理器。
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
+		// <5> 获得 HandlerExecutionChain 对象
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
@@ -569,37 +594,25 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
-	 * Build a {@link HandlerExecutionChain} for the given handler, including
-	 * applicable interceptors.
-	 * <p>The default implementation builds a standard {@link HandlerExecutionChain}
-	 * with the given handler, the common interceptors of the handler mapping, and any
-	 * {@link MappedInterceptor MappedInterceptors} matching to the current request URL. Interceptors
-	 * are added in the order they were registered. Subclasses may override this
-	 * in order to extend/rearrange the list of interceptors.
-	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a
-	 * pre-built {@link HandlerExecutionChain}. This method should handle those
-	 * two cases explicitly, either building a new {@link HandlerExecutionChain}
-	 * or extending the existing chain.
-	 * <p>For simply adding an interceptor in a custom subclass, consider calling
-	 * {@code super.getHandlerExecutionChain(handler, request)} and invoking
-	 * {@link HandlerExecutionChain#addInterceptor} on the returned chain object.
-	 * @param handler the resolved handler instance (never {@code null})
-	 * @param request current HTTP request
-	 * @return the HandlerExecutionChain (never {@code null})
-	 * @see #getAdaptedInterceptors()
+	 * 获得 HandlerExecutionChain 对象。
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+
+		// 创建 HandlerExecutionChain 对象
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 
+		// 遍历 adaptedInterceptors 数组，获得请求匹配的拦截器
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
+
+			// 需要匹配，若路径匹配，则添加到 chain 中
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
 				if (mappedInterceptor.matches(request)) {
 					chain.addInterceptor(mappedInterceptor.getInterceptor());
 				}
 			}
-			else {
+			else { // 无需匹配，直接添加到 chain 中
 				chain.addInterceptor(interceptor);
 			}
 		}

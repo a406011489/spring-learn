@@ -80,6 +80,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 	@Override
 	protected void addInterceptors(InterceptorRegistry registry) {
+		// 获得拦截器，并添加到 registry 中。
 		this.configurers.addInterceptors(registry);
 	}
 
