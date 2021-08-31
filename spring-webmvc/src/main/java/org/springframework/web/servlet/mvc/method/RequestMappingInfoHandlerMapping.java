@@ -56,12 +56,7 @@ import org.springframework.web.util.WebUtils;
 import org.springframework.web.util.pattern.PathPattern;
 
 /**
- * Abstract base class for classes for which {@link RequestMappingInfo} defines
- * the mapping between a request and a handler method.
- *
- * @author Arjen Poutsma
- * @author Rossen Stoyanchev
- * @since 3.1
+ * 即 Mapping 类型就是 RequestMappingInfo 。
  */
 public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
 
@@ -84,7 +79,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 
 	/**
-	 * Get the URL path patterns associated with the supplied {@link RequestMappingInfo}.
+	 * 获得 Mapping 对应的请求路径集合。
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
@@ -98,10 +93,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Check if the given RequestMappingInfo matches the current request and
-	 * return a (potentially new) instance with conditions that match the
-	 * current request -- for example with a subset of URL patterns.
-	 * @return an info in case of a match; or {@code null} otherwise.
+	 * 获得请求对应的 RequestMappingInfo 对象。
 	 */
 	@Override
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
@@ -128,13 +120,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Expose URI template variables, matrix variables, and producible media types in the request.
-	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
-	 * @see HandlerMapping#MATRIX_VARIABLES_ATTRIBUTE
-	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
+	 * 覆写父类的方法，设置更多的属性，到请求中。
 	 */
 	@Override
 	protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {
+
+		// 获得 bestPattern 和 uriVariables
 		super.handleMatch(info, lookupPath, request);
 
 		RequestCondition<?> condition = info.getActivePatternsCondition();
@@ -225,22 +216,19 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Iterate all RequestMappingInfo's once again, look if any match by URL at
-	 * least and raise exceptions according to what doesn't match.
-	 * @throws HttpRequestMethodNotSupportedException if there are matches by URL
-	 * but not by HTTP method
-	 * @throws HttpMediaTypeNotAcceptableException if there are matches by URL
-	 * but not by consumable/producible media types
+	 * 覆写父类方法，处理无匹配 Mapping 的情况。主要用途是，给出为什么找不到 Mapping 的原因。
 	 */
 	@Override
 	protected HandlerMethod handleNoMatch(
 			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
+		// <1> 创建 PartialMatchHelper 对象，解析可能的错误
 		PartialMatchHelper helper = new PartialMatchHelper(infos, request);
 		if (helper.isEmpty()) {
 			return null;
 		}
 
+		// <2> 方法错误
 		if (helper.hasMethodsMismatch()) {
 			Set<String> methods = helper.getAllowedMethods();
 			if (HttpMethod.OPTIONS.matches(request.getMethod())) {
@@ -250,6 +238,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(), methods);
 		}
 
+		// 可消费的 Content-Type 错误
 		if (helper.hasConsumesMismatch()) {
 			Set<MediaType> mediaTypes = helper.getConsumableMediaTypes();
 			MediaType contentType = null;
@@ -264,11 +253,13 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<>(mediaTypes));
 		}
 
+		// 可生产的 Content-Type 错误
 		if (helper.hasProducesMismatch()) {
 			Set<MediaType> mediaTypes = helper.getProducibleMediaTypes();
 			throw new HttpMediaTypeNotAcceptableException(new ArrayList<>(mediaTypes));
 		}
 
+		// <5> 参数错误
 		if (helper.hasParamsMismatch()) {
 			List<String[]> conditions = helper.getParamConditions();
 			throw new UnsatisfiedServletRequestParameterException(conditions, request.getParameterMap());

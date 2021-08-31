@@ -81,26 +81,49 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	private static final RequestConditionHolder EMPTY_CUSTOM = new RequestConditionHolder(null);
 
-
+	/**
+	 * 名字
+	 */
 	@Nullable
 	private final String name;
 
+	/**
+	 * 请求路径的条件
+	 */
 	@Nullable
 	private final PathPatternsRequestCondition pathPatternsCondition;
 
 	@Nullable
 	private final PatternsRequestCondition patternsCondition;
 
+	/**
+	 * 请求方法的条件
+	 */
 	private final RequestMethodsRequestCondition methodsCondition;
 
+	/**
+	 * 参数的条件
+	 */
 	private final ParamsRequestCondition paramsCondition;
 
+	/**
+	 * 请求头的条件
+	 */
 	private final HeadersRequestCondition headersCondition;
 
+	/**
+	 * 可消费的 Content-Type 的条件
+	 */
 	private final ConsumesRequestCondition consumesCondition;
 
+	/**
+	 * 可生产的 Content-Type 的条件
+	 */
 	private final ProducesRequestCondition producesCondition;
 
+	/**
+	 * 自定义的条件
+	 */
 	private final RequestConditionHolder customConditionHolder;
 
 	private final int hashCode;
@@ -356,13 +379,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
-	 * Checks if all conditions in this request mapping info match the provided
-	 * request and returns a potentially new request mapping info with conditions
-	 * tailored to the current request.
-	 * <p>For example the returned instance may contain the subset of URL
-	 * patterns that match to the current request, sorted with best matching
-	 * patterns on top.
-	 * @return a new instance in case of a match; or {@code null} otherwise
+	 * 从当前 RequestMappingInfo 获得匹配的条件。
+	 * 如果匹配，则基于其匹配的条件，创建新的 RequestMappingInfo 对象。如果不匹配，则返回 null 。
 	 */
 	@Override
 	@Nullable
@@ -405,21 +423,19 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (custom == null) {
 			return null;
 		}
+		// 为什么要创建 RequestMappingInfo 对象呢？因为当前 RequestMappingInfo 对象，一个 methodsCondition 可以配置 GET、POST、DELETE 等等条件，但是实际就匹配一个请求类型，此时 methods 只代表其匹配的那个。
 		return new RequestMappingInfo(
 				this.name, pathPatterns, patterns, methods, params, headers, consumes, produces, custom);
 	}
 
 	/**
-	 * Compares "this" info (i.e. the current instance) with another info in the
-	 * context of a request.
-	 * <p>Note: It is assumed both instances have been obtained via
-	 * {@link #getMatchingCondition(HttpServletRequest)} to ensure they have
-	 * conditions with content relevant to current request.
+	 * 比较优先级。
 	 */
 	@Override
 	public int compareTo(RequestMappingInfo other, HttpServletRequest request) {
 		int result;
-		// Automatic vs explicit HTTP HEAD mapping
+
+		// 针对 HEAD 请求方法，特殊处理
 		if (HttpMethod.HEAD.matches(request.getMethod())) {
 			result = this.methodsCondition.compareTo(other.getMethodsCondition(), request);
 			if (result != 0) {
