@@ -25,25 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and
- * write JSON using <a href="https://github.com/FasterXML/jackson">Jackson 2.x's</a> {@link ObjectMapper}.
- *
- * <p>This converter can be used to bind to typed beans, or untyped {@code HashMap} instances.
- *
- * <p>By default, this converter supports {@code application/json} and {@code application/*+json}
- * with {@code UTF-8} character set. This can be overridden by setting the
- * {@link #setSupportedMediaTypes supportedMediaTypes} property.
- *
- * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
- *
- * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
- *
- * @author Arjen Poutsma
- * @author Keith Donald
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @author Sebastien Deleuze
- * @since 3.1.2
+ * Spring MVC 提供的默认的 JSON 消息格式的转换器。
  */
 public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMessageConverter {
 

@@ -29,38 +29,42 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.SimpleSessionStatus;
 
 /**
- * Records model and view related decisions made by
- * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} and
- * {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers} during the course of invocation of
- * a controller method.
- *
- * <p>The {@link #setRequestHandled} flag can be used to indicate the request
- * has been handled directly and view resolution is not required.
- *
- * <p>A default {@link Model} is automatically created at instantiation.
- * An alternate model instance may be provided via {@link #setRedirectModel}
- * for use in a redirect scenario. When {@link #setRedirectModelScenario} is set
- * to {@code true} signalling a redirect scenario, the {@link #getModel()}
- * returns the redirect model instead of the default model.
- *
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @since 3.1
+ * 主要是作为 Model 和 View 的容器，当然其中还有其它属性。
  */
 public class ModelAndViewContainer {
 
+	/**
+	 * 是否在 redirect 重定向时，忽略 {@link #redirectModel}
+	 */
 	private boolean ignoreDefaultModelOnRedirect = false;
 
+	/**
+	 * 视图，Object 类型。
+	 *
+	 * 实际情况下，也可以是 String 类型的逻辑视图
+	 */
 	@Nullable
 	private Object view;
 
+	/**
+	 * 默认使用的 Model 。实际上是个 Map
+	 */
 	private final ModelMap defaultModel = new BindingAwareModelMap();
 
+	/**
+	 * redirect 重定向的 Model ，在重定向时使用。
+	 */
 	@Nullable
 	private ModelMap redirectModel;
 
+	/**
+	 * 处理器返回 redirect 视图的标识
+	 */
 	private boolean redirectModelScenario = false;
 
+	/**
+	 * Http 响应状态
+	 */
 	@Nullable
 	private HttpStatus status;
 
@@ -68,8 +72,14 @@ public class ModelAndViewContainer {
 
 	private final Set<String> bindingDisabled = new HashSet<>(4);
 
+	/**
+	 * 用于设置 SessionAttribute 的标识
+	 */
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
+	/**
+	 * 请求是否处理完的标识
+	 */
 	private boolean requestHandled = false;
 
 
@@ -132,12 +142,11 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Return the model to use -- either the "default" or the "redirect" model.
-	 * The default model is used if {@code redirectModelScenario=false} or
-	 * there is no redirect model (i.e. RedirectAttributes was not declared as
-	 * a method argument) and {@code ignoreDefaultModelOnRedirect=false}.
+	 * 获得 Model 对象。
 	 */
 	public ModelMap getModel() {
+
+		// 是否使用默认 Model
 		if (useDefaultModel()) {
 			return this.defaultModel;
 		}
@@ -153,6 +162,9 @@ public class ModelAndViewContainer {
 	 * Whether to use the default model or the redirect model.
 	 */
 	private boolean useDefaultModel() {
+
+		// 情况一 !this.redirectModelScenario ，处理器返回 redirect 视图的标识为 false 的时候，即不重定向。
+		// 情况二 this.redirectModel == null && !this.ignoreDefaultModelOnRedirect ，redirectModel 重定向 Model 为空，并且 ignoreDefaultModelOnRedirect 为 true ，即忽略 defaultModel 。
 		return (!this.redirectModelScenario || (this.redirectModel == null && !this.ignoreDefaultModelOnRedirect));
 	}
 

@@ -25,25 +25,15 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 
 /**
- * Handles return values of types {@code void} and {@code String} interpreting them
- * as view name reference. As of 4.2, it also handles general {@code CharSequence}
- * types, e.g. {@code StringBuilder} or Groovy's {@code GString}, as view names.
+ * 处理返回结果是视图名的 ReturnValueHandler 实现类。
  *
- * <p>A {@code null} return value, either due to a {@code void} return type or
- * as the actual return value is left as-is allowing the configured
- * {@link RequestToViewNameTranslator} to select a view name by convention.
- *
- * <p>A String return value can be interpreted in more than one ways depending on
- * the presence of annotations like {@code @ModelAttribute} or {@code @ResponseBody}.
- * Therefore this handler should be configured after the handlers that support these
- * annotations.
- *
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @since 3.1
+ * 该类适用于前后端未分离，Controller 返回视图名的场景，例如 JSP、Freemarker 等等。
  */
 public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	/**
+	 * 重定向的表达式的数组
+	 */
 	@Nullable
 	private String[] redirectPatterns;
 
@@ -78,27 +68,29 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
+		// 如果是 String 类型
 		if (returnValue instanceof CharSequence) {
+
+			// 设置视图名到 mavContainer 中
 			String viewName = returnValue.toString();
 			mavContainer.setViewName(viewName);
+
+			// 如果是重定向，则标记到 mavContainer 中
 			if (isRedirectViewName(viewName)) {
 				mavContainer.setRedirectModelScenario(true);
 			}
 		}
+
+		// 如果是非 String 类型，而且非 void ，则抛出 UnsupportedOperationException 异常
 		else if (returnValue != null) {
-			// should not happen
 			throw new UnsupportedOperationException("Unexpected return type: " +
 					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
 		}
 	}
 
 	/**
-	 * Whether the given view name is a redirect view reference.
-	 * The default implementation checks the configured redirect patterns and
-	 * also if the view name starts with the "redirect:" prefix.
-	 * @param viewName the view name to check, never {@code null}
-	 * @return "true" if the given view name is recognized as a redirect view
-	 * reference; "false" otherwise.
+	 * 判断是否为重定向的视图名。
+	 * "redirect:" 开头，就是重定向的视图。
 	 */
 	protected boolean isRedirectViewName(String viewName) {
 		return (PatternMatchUtils.simpleMatch(this.redirectPatterns, viewName) || viewName.startsWith("redirect:"));

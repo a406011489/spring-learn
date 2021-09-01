@@ -39,7 +39,8 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 
 
 	public AbstractHandlerMethodAdapter() {
-		// no restriction of HTTP methods by default
+		// 调用 WebContentGenerator 类的构造方法
+		// 参数 restrictDefaultSupportedMethods 参数为 false ，表示不需要严格校验 HttpMethod
 		super(false);
 	}
 
@@ -60,9 +61,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 
 
 	/**
-	 * This implementation expects the handler to be an {@link HandlerMethod}.
-	 * @param handler the handler instance to check
-	 * @return whether or not this adapter can adapt the given handler
+	 * 支持 HandlerMethod 类型的处理器。
 	 */
 	@Override
 	public final boolean supports(Object handler) {
@@ -102,7 +101,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception;
 
 	/**
-	 * This implementation expects the handler to be an {@link HandlerMethod}.
+	 * 获得最后更新时间。
 	 */
 	@Override
 	public final long getLastModified(HttpServletRequest request, Object handler) {

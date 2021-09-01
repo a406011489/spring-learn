@@ -25,12 +25,9 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
- * Strategy interface for converting from and to HTTP requests and responses.
- *
- * @author Arjen Poutsma
- * @author Juergen Hoeller
- * @since 3.0
- * @param <T> the converted object type
+ * 在 Spring MVC 中可以使用 @RequestBody 和 @ResponseBody 两个注解，
+ * 分别完成请求报文到对象和对象到响应报文的转换，底层这种灵活的消息转换机制，就是Spring 3.x 中新引入的 HttpMessageConverter ，
+ * 即消息转换器机制。
  */
 public interface HttpMessageConverter<T> {
 
