@@ -53,8 +53,8 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
- * @since 3.1
  * @see StandardServletMultipartResolver
+ * @since 3.1
  */
 public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
 
@@ -65,6 +65,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	/**
 	 * Create a new StandardMultipartHttpServletRequest wrapper for the given request,
 	 * immediately parsing the multipart content.
+	 *
 	 * @param request the servlet request to wrap
 	 * @throws MultipartException if parsing failed
 	 */
@@ -74,9 +75,10 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 	/**
 	 * Create a new StandardMultipartHttpServletRequest wrapper for the given request.
-	 * @param request the servlet request to wrap
+	 *
+	 * @param request     the servlet request to wrap
 	 * @param lazyParsing whether multipart parsing should be triggered lazily on
-	 * first access of multipart files or parameters
+	 *                    first access of multipart files or parameters
 	 * @throws MultipartException if an immediate parsing attempt failed
 	 * @since 3.2.9
 	 */
@@ -84,34 +86,48 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			throws MultipartException {
 
 		super(request);
+
+		// <1> 如果不延迟加载，则解析请求
 		if (!lazyParsing) {
 			parseRequest(request);
 		}
 	}
 
-
+	// 解析请求。
 	private void parseRequest(HttpServletRequest request) {
 		try {
 			Collection<Part> parts = request.getParts();
 			this.multipartParameterNames = new LinkedHashSet<>(parts.size());
 			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<>(parts.size());
+
+			// <1> 遍历 parts 数组
 			for (Part part : parts) {
+
+				// <1.1> 获得 CONTENT_DISPOSITION 头的值
 				String headerValue = part.getHeader(HttpHeaders.CONTENT_DISPOSITION);
+
+				// <1.2> 获得 ContentDisposition 对象
 				ContentDisposition disposition = ContentDisposition.parse(headerValue);
+
+				// <1.3> 获得文件名
 				String filename = disposition.getFilename();
+
+				// <1.4> 情况一，文件名非空，说明是文件参数，则创建 StandardMultipartFile 对象，添加到 files 中
 				if (filename != null) {
 					if (filename.startsWith("=?") && filename.endsWith("?=")) {
 						filename = MimeDelegate.decode(filename);
 					}
 					files.add(part.getName(), new StandardMultipartFile(part, filename));
-				}
-				else {
+				} else {
+
+					// <1.5> 情况二，文件名为空，说明是普通参数，则添加 part.name 到 multipartParameterNames 中
 					this.multipartParameterNames.add(part.getName());
 				}
 			}
+
+			// <2> 设置到 multipartFiles 属性
 			setMultipartFiles(files);
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			handleParseFailure(ex);
 		}
 	}
@@ -174,8 +190,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		try {
 			Part part = getPart(paramOrFileName);
 			return (part != null ? part.getContentType() : null);
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			throw new MultipartException("Could not access multipart servlet request", ex);
 		}
 	}
@@ -190,12 +205,10 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 					headers.put(headerName, new ArrayList<>(part.getHeaders(headerName)));
 				}
 				return headers;
-			}
-			else {
+			} else {
 				return null;
 			}
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			throw new MultipartException("Could not access multipart servlet request", ex);
 		}
 	}
@@ -280,8 +293,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 		public static String decode(String value) {
 			try {
 				return MimeUtility.decodeText(value);
-			}
-			catch (UnsupportedEncodingException ex) {
+			} catch (UnsupportedEncodingException ex) {
 				throw new IllegalStateException(ex);
 			}
 		}

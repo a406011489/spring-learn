@@ -981,22 +981,27 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Returns a {@link HandlerExceptionResolverComposite} containing a list of exception
-	 * resolvers obtained either through {@link #configureHandlerExceptionResolvers} or
-	 * through {@link #addDefaultHandlerExceptionResolvers}.
-	 * <p><strong>Note:</strong> This method cannot be made final due to CGLIB constraints.
-	 * Rather than overriding it, consider overriding {@link #configureHandlerExceptionResolvers}
-	 * which allows for providing a list of resolvers.
+	 * 在默认配置的 Spring Boot 场景下，是通过 WebMvcConfigurationSupport 的 #handlerExceptionResolver() 方法，进行初始化。
 	 */
 	@Bean
 	public HandlerExceptionResolver handlerExceptionResolver(
 			@Qualifier("mvcContentNegotiationManager") ContentNegotiationManager contentNegotiationManager) {
+
+		// <1> 创建 HandlerExceptionResolver 数组
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
+
+		// <1.1> 添加配置的 HandlerExceptionResolver 到 exceptionResolvers 中
 		configureHandlerExceptionResolvers(exceptionResolvers);
+
+		// <1.2> 如果 exceptionResolvers 为空，添加默认 HandlerExceptionResolver 数组
 		if (exceptionResolvers.isEmpty()) {
 			addDefaultHandlerExceptionResolvers(exceptionResolvers, contentNegotiationManager);
 		}
+
+		// <1.3> 子类定义的 HandlerExceptionResolver 数组，到 exceptionResolvers 中
 		extendHandlerExceptionResolvers(exceptionResolvers);
+
+		// <2> 创建 HandlerExceptionResolverComposite 数组
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(exceptionResolvers);

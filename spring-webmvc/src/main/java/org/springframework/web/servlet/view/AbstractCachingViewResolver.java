@@ -31,17 +31,7 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 
 /**
- * Convenient base class for {@link org.springframework.web.servlet.ViewResolver}
- * implementations. Caches {@link org.springframework.web.servlet.View} objects
- * once resolved: This means that view resolution won't be a performance problem,
- * no matter how costly initial view retrieval is.
- *
- * <p>Subclasses need to implement the {@link #loadView} template method,
- * building the View object for a specific view name and locale.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @see #loadView
+ * 提供通用的缓存的 ViewResolver 抽象类。对于相同的视图名，返回的是相同的 View 对象，所以通过缓存，可以进一步提供性能。
  */
 public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
@@ -64,7 +54,8 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	private static final CacheFilter DEFAULT_CACHE_FILTER = (view, viewName, locale) -> true;
 
 
-	/** The maximum number of entries in the cache. */
+	/**
+	 *  缓存上限。如果 cacheLimit = 0 ，表示禁用缓存 */
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	/** Whether we should refrain from resolving views again if unresolved once. */
@@ -170,21 +161,36 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	@Override
 	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
+
+		// 如果禁用缓存，则创建 viewName 对应的 View 对象
 		if (!isCache()) {
 			return createView(viewName, locale);
 		}
 		else {
+
+			// 获得缓存 KEY
 			Object cacheKey = getCacheKey(viewName, locale);
+
+			// 从 viewAccessCache 缓存中，获得 View 对象
 			View view = this.viewAccessCache.get(cacheKey);
+
+			// 如果获得不到缓存，则从 viewCreationCache 中，获得 View 对象
 			if (view == null) {
 				synchronized (this.viewCreationCache) {
+
+					// 从 viewCreationCache 中，获得 View 对象
 					view = this.viewCreationCache.get(cacheKey);
+
+					// 如果不存在，则创建 viewName 对应的 View 对象
 					if (view == null) {
-						// Ask the subclass to create the View object.
+						// 创建 viewName 对应的 View 对象
 						view = createView(viewName, locale);
+
+						// 如果创建失败，但是 cacheUnresolved 为 true ，则设置为 UNRESOLVED_VIEW
 						if (view == null && this.cacheUnresolved) {
 							view = UNRESOLVED_VIEW;
 						}
+						// 如果 view 非空，则添加到 viewAccessCache 缓存中
 						if (view != null && this.cacheFilter.filter(view, viewName, locale)) {
 							this.viewAccessCache.put(cacheKey, view);
 							this.viewCreationCache.put(cacheKey, view);

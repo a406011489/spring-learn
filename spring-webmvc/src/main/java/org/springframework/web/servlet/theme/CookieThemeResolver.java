@@ -28,17 +28,7 @@ import org.springframework.web.util.CookieGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link ThemeResolver} implementation that uses a cookie sent back to the user
- * in case of a custom setting, with a fallback to the default theme.
- * This is particularly useful for stateless applications without user sessions.
- *
- * <p>Custom controllers can thus override the user's theme by calling
- * {@code setThemeName}, e.g. responding to a certain theme change request.
- *
- * @author Jean-Pierre Pawlak
- * @author Juergen Hoeller
- * @since 17.06.2003
- * @see #setThemeName
+ * 将themeName 保存到 Cookie
  */
 public class CookieThemeResolver extends CookieGenerator implements ThemeResolver {
 

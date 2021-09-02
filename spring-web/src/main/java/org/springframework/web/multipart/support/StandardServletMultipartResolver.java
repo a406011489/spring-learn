@@ -27,39 +27,13 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 
 /**
- * Standard implementation of the {@link MultipartResolver} interface,
- * based on the Servlet 3.0 {@link javax.servlet.http.Part} API.
- * To be added as "multipartResolver" bean to a Spring DispatcherServlet context,
- * without any extra configuration at the bean level (see below).
- *
- * <p><b>Note:</b> In order to use Servlet 3.0 based multipart parsing,
- * you need to mark the affected servlet with a "multipart-config" section in
- * {@code web.xml}, or with a {@link javax.servlet.MultipartConfigElement}
- * in programmatic servlet registration, or (in case of a custom servlet class)
- * possibly with a {@link javax.servlet.annotation.MultipartConfig} annotation
- * on your servlet class. Configuration settings such as maximum sizes or
- * storage locations need to be applied at that servlet registration level;
- * Servlet 3.0 does not allow for them to be set at the MultipartResolver level.
- *
- * <pre class="code">
- * public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
- *	 // ...
- *	 &#064;Override
- *	 protected void customizeRegistration(ServletRegistration.Dynamic registration) {
- *     // Optionally also set maxFileSize, maxRequestSize, fileSizeThreshold
- *     registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
- *   }
- * }
- * </pre>
- *
- * @author Juergen Hoeller
- * @since 3.1
- * @see #setResolveLazily
- * @see HttpServletRequest#getParts()
- * @see org.springframework.web.multipart.commons.CommonsMultipartResolver
+ * 使用 Servlet 3.0 标准的上传 API 的 MultipartResolver 实现类。
  */
 public class StandardServletMultipartResolver implements MultipartResolver {
 
+	/**
+	 * 是否延迟解析
+	 */
 	private boolean resolveLazily = false;
 
 
@@ -82,11 +56,13 @@ public class StandardServletMultipartResolver implements MultipartResolver {
 		return StringUtils.startsWithIgnoreCase(request.getContentType(), "multipart/");
 	}
 
+	// 创建 StandardMultipartHttpServletRequest 对象。
 	@Override
 	public MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException {
 		return new StandardMultipartHttpServletRequest(request, this.resolveLazily);
 	}
 
+	// 删除临时的 javax.servlet.http.Part 们。
 	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
 		if (!(request instanceof AbstractMultipartHttpServletRequest) ||

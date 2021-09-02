@@ -26,34 +26,7 @@ import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * {@link RequestToViewNameTranslator} that simply transforms the URI of
- * the incoming request into a view name.
- *
- * <p>Can be explicitly defined as the {@code viewNameTranslator} bean in a
- * {@link org.springframework.web.servlet.DispatcherServlet} context.
- * Otherwise, a plain default instance will be used.
- *
- * <p>The default transformation simply strips leading and trailing slashes
- * as well as the file extension of the URI, and returns the result as the
- * view name with the configured {@link #setPrefix prefix} and a
- * {@link #setSuffix suffix} added as appropriate.
- *
- * <p>The stripping of the leading slash and file extension can be disabled
- * using the {@link #setStripLeadingSlash stripLeadingSlash} and
- * {@link #setStripExtension stripExtension} properties, respectively.
- *
- * <p>Find below some examples of request to view name translation.
- * <ul>
- * <li>{@code http://localhost:8080/gamecast/display.html} &raquo; {@code display}</li>
- * <li>{@code http://localhost:8080/gamecast/displayShoppingCart.html} &raquo; {@code displayShoppingCart}</li>
- * <li>{@code http://localhost:8080/gamecast/admin/index.html} &raquo; {@code admin/index}</li>
- * </ul>
- *
- * @author Rob Harrop
- * @author Juergen Hoeller
- * @since 2.0
- * @see org.springframework.web.servlet.RequestToViewNameTranslator
- * @see org.springframework.web.servlet.ViewResolver
+ * 实现 RequestToViewNameTranslator 接口，默认且是唯一的 RequestToViewNameTranslator 实现类。
  */
 public class DefaultRequestToViewNameTranslator implements RequestToViewNameTranslator {
 
@@ -66,10 +39,19 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 
 	private String separator = SLASH;
 
+	/**
+	 * 是否移除开头 {@link #SLASH}
+	 */
 	private boolean stripLeadingSlash = true;
 
+	/**
+	 * 是否移除末尾 {@link #SLASH}
+	 */
 	private boolean stripTrailingSlash = true;
 
+	/**
+	 * URL 路径工具类
+	 */
 	private boolean stripExtension = true;
 
 
@@ -175,17 +157,16 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 */
 	@Override
 	public String getViewName(HttpServletRequest request) {
+
+		// 获得请求路径
 		String path = ServletRequestPathUtils.getCachedPathValue(request);
+
+		// 获得视图名
 		return (this.prefix + transformPath(path) + this.suffix);
 	}
 
 	/**
-	 * Transform the request URI (in the context of the webapp) stripping
-	 * slashes and extensions, and replacing the separator as required.
-	 * @param lookupPath the lookup path for the current request,
-	 * as determined by the UrlPathHelper
-	 * @return the transformed path, with slashes and extensions stripped
-	 * if desired
+	 * ，转换请求路径，后续在拼接上 prefix 和 suffix ，形成最终的视图名。
 	 */
 	@Nullable
 	protected String transformPath(String lookupPath) {
