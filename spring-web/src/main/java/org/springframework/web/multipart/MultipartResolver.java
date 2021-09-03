@@ -24,6 +24,10 @@ import javax.servlet.http.HttpServletRequest;
  * 例如：
  * 文件上传请求，MultipartResolver 会将 HttpServletRequest 封装成 MultipartHttpServletRequest ，
  * 这样从 MultipartHttpServletRequest 中获得上传的文件。
+ *
+ * MultipartResolver ⽤于上传请求，通过将普通的请求包装成 MultipartHttpServletRequest 来实现。
+ * MultipartHttpServletRequest 可以通过 getFile() ⽅法 直接获得⽂件。如果上传多个⽂件，
+ * 还可以调⽤ getFileMap()⽅法得到Map<FileName，File>这样的结构，MultipartResolver 的作用就是封装普通的请求，使其拥有⽂件上传的功能。
  */
 public interface MultipartResolver {
 

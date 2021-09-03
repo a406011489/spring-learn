@@ -23,12 +23,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Contract that decouples the {@link DispatcherHandler} from the details of
- * invoking a handler and makes it possible to support any handler type.
- *
- * @author Rossen Stoyanchev
- * @author Sebastien Deleuze
- * @since 5.0
+ * HandlerAdapter是⼀个适配器。因为Spring MVC中Handler可以是任意形式的，只要能处理请求即可。
+ * 但是把请求交给 Servlet 的时候，由于 Servlet 的⽅法结构都是doService(HttpServletRequest req,HttpServletResponse resp)形式的，
+ * 要让固定的Servlet处理方法调用 Handler 来进⾏处理，便是 HandlerAdapter 的职责。
  */
 public interface HandlerAdapter {
 

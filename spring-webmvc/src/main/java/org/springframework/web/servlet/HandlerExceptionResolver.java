@@ -24,6 +24,9 @@ import org.springframework.lang.Nullable;
 /**
  * 处理器异常解析器接口，将处理器( handler )执行时发生的异常，解析( 转换 )成对应的 ModelAndView 结果。
  * 也就是说，如果异常被解析成功，则会返回 ModelAndView 对象。
+ *
+ * HandlerExceptionResolver ⽤于处理 Handler 产⽣的异常情况。它的作⽤是根据异常设置
+ * ModelAndView，之后交给渲染⽅法进⾏渲染，渲染⽅法会将 ModelAndView 渲染成⻚⾯。
  */
 public interface HandlerExceptionResolver {
 

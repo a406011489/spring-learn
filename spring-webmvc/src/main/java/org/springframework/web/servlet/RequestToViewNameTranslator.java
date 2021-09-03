@@ -22,6 +22,9 @@ import org.springframework.lang.Nullable;
 
 /**
  * 请求到视图名的转换器接口。
+ *
+ * 该组件的作⽤是从请求中获取 ViewName.因为 ViewResolver 根据ViewName 查找 View，
+ * 但有的 Handler 处理完成之后,没有设置 View，也没有设置 ViewName，便要通过这个组件从请求中查找 ViewName。
  */
 public interface RequestToViewNameTranslator {
 

@@ -28,6 +28,14 @@ import org.springframework.lang.Nullable;
  * 也就是说：重定向前，保存参数到 Seesion 中。重定向后，从 Session 中获得参数，并移除。
  *
  * 当然，实际场景下，使用的非常少，特别是前后端分离之后。
+ *
+ *
+ * FlashMap⽤于重定向时的参数传递，⽐如在处理⽤户订单时候，为了避免重复提交，可以处理完post请求之后重定向到⼀个get请求，
+ * 这个get请求可以⽤来显示订单详情之类的信息。这样做虽然可以规避⽤户重新提交订单的问题，但是在这个⻚⾯上要显示订单的信息，
+ * 这些数据从哪⾥来获得呢？因为重定向时没有传递参数这⼀功能的，如果不想把参数写进URL（不推荐），那么就可以通过FlashMap来传递。
+ * 只需要在重定向之前将要传递的数据写⼊请求（可以通过ServletRequestAttributes.getRequest()⽅法获得）的属性OUTPUT_FLASH_MAP_ATTRIBUTE中，
+ * 这样在重定向之后的Handler中Spring就会⾃动将其设置到Model中，在显示订单信息的⻚⾯上就可以直接从Model中获取数据。
+ * FlashMapManager 就是⽤来管理 FalshMap 的。
  */
 public interface FlashMapManager {
 

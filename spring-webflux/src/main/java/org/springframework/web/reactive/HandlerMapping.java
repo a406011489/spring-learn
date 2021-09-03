@@ -21,12 +21,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Interface to be implemented by objects that define a mapping between
- * requests and handler objects.
- *
- * @author Rossen Stoyanchev
- * @author Sebastien Deleuze
- * @since 5.0
+ * 处理器映射器，⽤来查找Handler的也就是处理器，具体的表现形式可以是类，也可以是⽅法。
+ * ⽐如，标注了@RequestMapping的每个⽅法都可以看成是⼀个Handler。Handler负责具体实际的请求处理，
+ * 在请求到达后，HandlerMapping的作⽤便是找到请求相应的处理器Handler 和 Interceptor
  */
 public interface HandlerMapping {
 

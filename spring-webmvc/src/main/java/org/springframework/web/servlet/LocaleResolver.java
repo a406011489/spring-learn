@@ -25,6 +25,10 @@ import org.springframework.lang.Nullable;
 
 /**
  * 本地化( 国际化 )解析器接口。
+ *
+ * ViewResolver 组件的 resolveViewName ⽅法需要两个参数，⼀个是视图名，⼀个是 Locale。
+ * LocaleResolver ⽤于从请求中解析出 Locale，⽐如中国 Locale 是 zh-CN，⽤来表示⼀个区域。这
+ * 个组件也是 i18n 的基础。
  */
 public interface LocaleResolver {
 
