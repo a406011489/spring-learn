@@ -816,7 +816,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			}
 		}
 		else {
-			// No synchronization on session demanded at all...
+			// 如果当前不需要对Session进行同步处理，则直接对HandlerMethod进行适配
 			mav = invokeHandlerMethod(request, response, handlerMethod);
 		}
 
@@ -910,7 +910,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
-			// <9> 执行调用
+			// <9> 对请求参数进行处理，调用目标HandlerMethod，并且将返回值封装成为一个ModelAndView对象
 			invocableMethod.invokeAndHandle(webRequest, mavContainer);
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;

@@ -38,7 +38,7 @@ public class HandlerExecutionChain {
 	private static final Log logger = LogFactory.getLog(HandlerExecutionChain.class);
 
 	/**
-	 * 处理器
+	 * 处理器，就是我们所知道的Controller
 	 */
 	private final Object handler;
 

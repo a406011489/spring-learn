@@ -43,7 +43,6 @@ public interface MultipartResolver {
 
 	/**
 	 * 清理处理 multipart 产生的资源，例如临时文件
-	 *
 	 */
 	void cleanupMultipart(MultipartHttpServletRequest request);
 

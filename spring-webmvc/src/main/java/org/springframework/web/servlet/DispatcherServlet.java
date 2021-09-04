@@ -212,39 +212,39 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** Perform cleanup of request attributes after include request?. */
 	private boolean cleanupAfterInclude = true;
 
-	/** MultipartResolver used by this servlet. */
+	// 多部件解析器
 	@Nullable
 	private MultipartResolver multipartResolver;
 
-	/** LocaleResolver used by this servlet. */
+	// 区域化 国际化解析器
 	@Nullable
 	private LocaleResolver localeResolver;
 
-	/** ThemeResolver used by this servlet. */
+	// 主题解析器
 	@Nullable
 	private ThemeResolver themeResolver;
 
-	/** List of HandlerMappings used by this servlet. */
+	// 处理器映射器组件
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
 
-	/** List of HandlerAdapters used by this servlet. */
+	// 处理器适配器组件
 	@Nullable
 	private List<HandlerAdapter> handlerAdapters;
 
-	/** List of HandlerExceptionResolvers used by this servlet. */
+	// 异常解析器组件
 	@Nullable
 	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
-	/** RequestToViewNameTranslator used by this servlet. */
+	// 默认视图名转换器组件
 	@Nullable
 	private RequestToViewNameTranslator viewNameTranslator;
 
-	/** FlashMapManager used by this servlet. */
+	// flash属性管理组件
 	@Nullable
 	private FlashMapManager flashMapManager;
 
-	/** List of ViewResolvers used by this servlet. */
+	// 视图解析器
 	@Nullable
 	private List<ViewResolver> viewResolvers;
 
@@ -434,12 +434,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Initialize the MultipartResolver used by this class.
-	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
-	 * no multipart handling is provided.
+	 * 多部件解析器的初始化必须按照id注册对象
 	 */
 	private void initMultipartResolver(ApplicationContext context) {
 		try {
+			// 多部件解析器的初始化必须按照id注册对象
 			this.multipartResolver = context.getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Detected " + this.multipartResolver);
@@ -515,7 +514,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// <1> 如果开启探测功能，则扫描已注册的 HandlerMapping 的 Bean 们，添加到 handlerMappings 中
 		if (this.detectAllHandlerMappings) {
-			// 扫描已注册的 HandlerMapping 的 Bean 们
+			// 扫描已注册的 HandlerMapping 的 Bean 们，
+			// 也就是说，按照 HandlerMapping.class类型去ioc容器中找到所有的 HandlerMapping。
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 
@@ -528,6 +528,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {  // <2> 如果关闭探测功能，则获得 HANDLER_MAPPING_BEAN_NAME 对应的 Bean 对象，并设置为 handlerMappings
 			try {
+				// 也就是说按照固定的名称去找，这个固定名称就是(handlerMapping)
 				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
@@ -538,6 +539,9 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// <3> 如果未获得到，则获得默认配置的 HandlerMapping 类
 		if (this.handlerMappings == null) {
+
+			// 如果按照类型和按照固定id从ioc容器中找不到对应组件，则会按照默认策略进⾏注册初始化，
+			// 默认策略在DispatcherServlet.properties⽂件中配置
 			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No HandlerMappings declared for servlet '" + getServletName() +
@@ -959,13 +963,18 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
+
+				// 1、检查文件是不是上传请求
 				processedRequest = checkMultipart(request);
+
 				multipartRequestParsed = (processedRequest != request);
 
-				// <3> 获得请求对应的 HandlerExecutionChain 对象
+				// <3> 获得请求对应的 HandlerExecutionChain 对象，也就是取得当前请求的Controller
+				// 但这里不是返回Controller，而是返回执行链，该对象封装了Handler和Interceptor
 				mappedHandler = getHandler(processedRequest);
+
+				// <3.1> 如果获取不到，则根据配置抛出异常或返回 404 错误
 				if (mappedHandler == null) {
-					// <3.1> 如果获取不到，则根据配置抛出异常或返回 404 错误
 					noHandlerFound(processedRequest, response);
 					return;
 				}
@@ -973,7 +982,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// <4> 获得当前 handler 对应的 HandlerAdapter 对象
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
-				// Process last-modified header, if supported by the handler.
+				// 处理 last-modified 请求头
 				String method = request.getMethod();
 				boolean isGet = "GET".equals(method);
 				if (isGet || "HEAD".equals(method)) {
@@ -995,7 +1004,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				// <8> 视图
+				// <8> 结果视图对象的处理
 				applyDefaultViewName(processedRequest, mv);
 
 				// <9> 后置处理 拦截器
@@ -1009,7 +1018,7 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
-			// 处理正常和异常的请求调用结果。
+			// 处理正常和异常的请求调用结果。也就是跳转页面，渲染视图。
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1076,7 +1085,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Did the handler return a view to render?
 		if (mv != null && !mv.wasCleared()) {
 
-			// <3.1> 渲染页面
+			// <3.1> 完成渲染页面工作
 			render(mv, request, response);
 
 			// <3.2> 清理请求中的错误消息属性
@@ -1140,6 +1149,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 			else {
 				try {
+					// 如果是上传请求则会封装成 MultipartHttpServletRequest 对象
 					return this.multipartResolver.resolveMultipart(request);
 				}
 				catch (MultipartException ex) {
@@ -1212,10 +1222,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * No handler found -> set appropriate HTTP response status.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @throws Exception if preparing the response failed
+	 * 如果没找到对应的Controller则返回404
 	 */
 	protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (pageNotFoundLogger.isWarnEnabled()) {

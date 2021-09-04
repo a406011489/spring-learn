@@ -140,7 +140,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
 
-		// 执行调用
+		// 通过反射执行调用
 		return doInvoke(args);
 	}
 
