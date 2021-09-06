@@ -23,6 +23,9 @@ import org.springframework.lang.Nullable;
 
 /**
  * 处理器匹配接口，根据请求(handler)获得其的处理器(handler)和拦截器们(HandlerInterceptor数组)。
+ *
+ * 内部维护了一些 <访问路径, 处理器> 映射，负责为请求找到合适的处理器
+ * 就相当于里面有<url,Controller>
  */
 public interface HandlerMapping {
 
